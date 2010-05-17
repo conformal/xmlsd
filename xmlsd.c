@@ -15,7 +15,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-static const char	*cvstag = "$xmlsd$";
+__attribute__((unused)) static const char	*cvstag = "$xmlsd$";
 
 #include "xmlsd.h"
 
@@ -32,6 +32,13 @@ struct xmlsd_context {
 	struct xmlsd_element_list	*xml_el;
 };
 
+static int			xmlsd_error = XMLSD_ERR_UNKNOWN;
+#define XMLSD_ABORT(_xml, _rv)	do {					\
+					xmlsd_error = _rv; 		\
+					XML_StopParser(_xml, XML_FALSE);\
+					return;				\
+				} while (0)
+
 void
 xmlsd_chardata(void *data, const XML_Char *s, int len)
 {
@@ -41,7 +48,7 @@ xmlsd_chardata(void *data, const XML_Char *s, int len)
 	struct	xmlsd_context	*ctx = data;
 
 	if (ctx == NULL)
-		errx(1, "xmlsd_chardata: no data");
+		errx(1, "xmlsd_chardata: no context");
 	xml = ctx->xml_parser;
 
 	/* make sure it isn't EOL */
@@ -59,7 +66,7 @@ xmlsd_chardata(void *data, const XML_Char *s, int len)
 
 		ctx->value = malloc(XML_PAGE_SIZE);
 		if (ctx->value == NULL)
-			err(1, "malloc");
+			XMLSD_ABORT(xml, XMLSD_ERR_RESOURCE);
 		ctx->tot_size += XML_PAGE_SIZE;
 	}
 
@@ -69,8 +76,10 @@ xmlsd_chardata(void *data, const XML_Char *s, int len)
 		    newlen += XML_PAGE_SIZE)
 			;
 
-		if (newlen > XML_MAX_PAGE_SIZE)
-			errx(1, "page too big");
+		if (newlen > XML_MAX_PAGE_SIZE) {
+			XMLSD_ABORT(xml, XMLSD_ERR_OVERFLOW);
+			return;
+		}
 
 		newvalue = realloc(ctx->value, newlen);
 		if (newvalue == NULL) {
@@ -78,7 +87,7 @@ xmlsd_chardata(void *data, const XML_Char *s, int len)
 			ctx->value = NULL;
 			ctx->value_at = 0;
 			ctx->tot_size = 0;
-			errx(1, "realloc");
+			XMLSD_ABORT(xml, XMLSD_ERR_RESOURCE);
 		}
 		ctx->value = newvalue;
 		ctx->tot_size = newlen;
@@ -100,29 +109,29 @@ xmlsd_start(void *data, const char *el, const char **attr)
 	struct xmlsd_attribute	*xa;
 
 	if (ctx == NULL)
-		errx(1, "xmlsd_start: no data");
+		errx(1, "xmlsd_start: no context");
 	xml = ctx->xml_parser;
 
 	xe = malloc(sizeof *xe);
 	if (xe == NULL)
-		err(1, "xmlsd_start: malloc xe");
+		XMLSD_ABORT(xml, XMLSD_ERR_RESOURCE);
 	TAILQ_INSERT_TAIL(ctx->xml_el, xe, entry);
 	xe->name = strdup(el);
 	if (xe->name == NULL)
-		err(1, "xmlsd_start: strdup element name");
+		XMLSD_ABORT(xml, XMLSD_ERR_RESOURCE);
 	TAILQ_INIT(&xe->attr_list);
 
 	for (i = 0; attr[i]; i += 2) {
-		//fprintf(stderr, "%s -> %s = %s\n", el, attr[i], attr[i + 1]);
+		/*fprintf(stderr, "%s -> %s = %s\n", el, attr[i], attr[i + 1]);*/
 		xa = malloc(sizeof *xa);
 		if (xa == NULL)
-			err(1, "xmlsd_start: malloc xa");
+			XMLSD_ABORT(xml, XMLSD_ERR_RESOURCE);
 		xa->name = strdup(attr[i]);
 		if (xa->name == NULL)
-			err(1, "xmlsd_start: strdup attribute name");
+			XMLSD_ABORT(xml, XMLSD_ERR_RESOURCE);
 		xa->value = strdup(attr[i + 1]);
 		if (xa->value == NULL)
-			err(1, "xmlsd_start: strdup attribute value");
+			XMLSD_ABORT(xml, XMLSD_ERR_RESOURCE);
 		TAILQ_INSERT_TAIL(&xe->attr_list, xa, entry);
 	}
 
@@ -147,7 +156,7 @@ xmlsd_end(void *data, const char *el)
 	struct xmlsd_element	*xe;
 
 	if (ctx == NULL)
-		errx(1, "xmlsd_end: no data");
+		errx(1, "xmlsd_end: no context");
 	xml = ctx->xml_parser;
 
 	if (ctx->value) {
@@ -162,14 +171,14 @@ xmlsd_end(void *data, const char *el)
 		/* save off value */
 		xe = TAILQ_LAST(ctx->xml_el, xmlsd_element_list);
 		if (xe == NULL)
-			errx(1, "xmlsd_end: TAILQ_LAST");
+			XMLSD_ABORT(xml, XMLSD_ERR_INTEGRITY);
 		if (strcmp(xe->name, el))
-			errx(1, "xmlsd_end: invalid element");
+			XMLSD_ABORT(xml, XMLSD_ERR_INTEGRITY);
 		if (xe->value)
-			errx(1, "xmlsd_end: %s already has a value", ctx->value);
+			XMLSD_ABORT(xml, XMLSD_ERR_INTEGRITY);
 		xe->value = strdup(ctx->value);
 		if (xe->value == NULL)
-			err(1, "xmlsd_end: strdup value");
+			XMLSD_ABORT(xml, XMLSD_ERR_RESOURCE);
 
 		free(ctx->value);
 		ctx->value = NULL;
@@ -185,12 +194,12 @@ xmlsd_parse(FILE *f, struct xmlsd_element_list *xl)
 {
 	XML_Parser		xml;
 	struct xmlsd_context	ctx;
-	int			done, rv = 1;
+	int			done, rv = XMLSD_ERR_UNKNOWN, status;
 	size_t			r;
 	char			b[XML_PAGE_SIZE];
 
 	if (xl == NULL)
-		return (1);
+		return (XMLSD_ERR_INTEGRITY);
 
 	TAILQ_INIT(xl);
 
@@ -199,7 +208,7 @@ xmlsd_parse(FILE *f, struct xmlsd_element_list *xl)
 
 	xml = XML_ParserCreate(NULL);
 	if (xml == NULL)
-		return (1);
+		return (XMLSD_ERR_RESOURCE);
 
 	ctx.xml_parser = xml;
 	ctx.xml_el = xl;
@@ -210,24 +219,35 @@ xmlsd_parse(FILE *f, struct xmlsd_element_list *xl)
 
 	for (done = 0; done == 0;) {
 		r = fread(b, 1, sizeof b, f);
-		if (ferror(f))
+		if (ferror(f)) {
+			rv = XMLSD_ERR_EXTERNAL;
 			goto done;
+		}
 		done = feof(f);
-		if (XML_Parse(xml, b, r, done) == XML_STATUS_ERROR)
-			goto done; /* XXX do return codes */
+		if (XML_Parse(xml, b, r, done) != XML_STATUS_OK) {
+			status = XML_GetErrorCode(xml);
+			if (status == XML_ERROR_ABORTED)
+				rv = xmlsd_error;
+			else
+				rv = XMLSD_ERR_PARSER;
+			goto done;
+		}
 	}
 
-	XML_ParserFree(xml);
-	rv = 0;
+	rv = XMLSD_ERR_SUCCES;
 done:
+	XML_ParserFree(xml);
 	return (rv);
 }
 
-void
+int
 xmlsd_unwind(struct xmlsd_element_list *xl)
 {
 	struct xmlsd_element		*xe;
 	struct xmlsd_attribute		*xa;
+
+	if (xl == NULL)
+		return (XMLSD_ERR_INTEGRITY);
 
 	while ((xe = TAILQ_FIRST(xl))) {
 		TAILQ_REMOVE(xl, xe, entry);
@@ -248,29 +268,6 @@ xmlsd_unwind(struct xmlsd_element_list *xl)
 			free(xe->value);
 		free(xe);
 	}
+
+	return (XMLSD_ERR_SUCCES);
 }
-
-#if 0
-int
-main(int argc, char *argv[])
-{
-	struct xmlsd_element_list	xl;
-	struct xmlsd_element		*xe;
-	struct xmlsd_attribute		*xa;
-
-	xml_parse(stdin, &xl);
-	TAILQ_FOREACH(xe, &xl, entry) {
-		fprintf(stderr, "%d %s = %s (parent = %s)\n",
-		    xe->depth,
-		    xe->name,
-		    xe->value ? xe->value : "NOVAL",
-		    xe->parent ? xe->parent->name : "NOPARENT");
-		TAILQ_FOREACH(xa, &xe->attr_list, entry)
-			fprintf(stderr, "\t%s = %s\n", xa->name, xa->value);
-	}
-
-	xml_unwind(&xl);
-
-	return (0);
-}
-#endif

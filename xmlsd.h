@@ -18,14 +18,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <err.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
+#include <err.h>
 #include <string.h>
 #include <expat.h>
 
 #include <sys/queue.h>
+
+#define XMLSD_ERR_UNKNOWN	(-1)
+#define XMLSD_ERR_SUCCES	(0)
+#define XMLSD_ERR_PARSER	(1)
+#define XMLSD_ERR_RESOURCE	(2)
+#define XMLSD_ERR_EXTERNAL	(3)
+#define XMLSD_ERR_OVERFLOW	(4)
+#define XMLSD_ERR_INTEGRITY	(5)
 
 struct xmlsd_attribute {
 	TAILQ_ENTRY(xmlsd_attribute)	entry;
@@ -44,3 +52,5 @@ struct xmlsd_element {
 };
 TAILQ_HEAD(xmlsd_element_list, xmlsd_element);
 
+int			xmlsd_parse(FILE *, struct xmlsd_element_list *);
+int			xmlsd_unwind(struct xmlsd_element_list *);
