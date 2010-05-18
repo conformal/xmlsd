@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+
+<auth version="1">
+  <session_key>12345</session_key>
+  <trans_token>0987654321</trans_token>
+</auth>
