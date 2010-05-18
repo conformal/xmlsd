@@ -52,5 +52,7 @@ struct xmlsd_element {
 };
 TAILQ_HEAD(xmlsd_element_list, xmlsd_element);
 
-int			xmlsd_parse(FILE *, struct xmlsd_element_list *);
 int			xmlsd_unwind(struct xmlsd_element_list *);
+int			xmlsd_parse_file(FILE *, struct xmlsd_element_list *);
+int			xmlsd_parse_mem(char *, size_t,
+			    struct xmlsd_element_list *);

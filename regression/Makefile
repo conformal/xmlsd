@@ -1,14 +1,7 @@
 # $xmlsd$
 
-PROG=regress
-#MAN=regress.8
-NOMAN=
+.include <bsd.own.mk>
 
-SRCS= regress.c
-COPT+= -O2
-DEBUG+= -ggdb3 
-CFLAGS+= -Wall
-CFLAGS+= -I../../
-LDFLAGS+= -lexpat -L../../obj/ -lxmlsd
+SUBDIR= file mem
 
-.include <bsd.prog.mk>
+.include <bsd.subdir.mk>

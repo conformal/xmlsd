@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+
+<preauth version="1">
+  <session_key>12345</session_key>
+  <lastname>Peereboom</lastname>
+  <firstname>Marco</firstname>
+  <addr1>1709 Possum Trot St.</addr1>
+  <addr2>Suite upstairs</addr2>
+  <city>Round Rock</city>
+  <state>TX</state>
+  <zip>78681</zip>
+  <cc_number>1234567890123456</cc_number>
+  <expccm>10</expccm>
+  <expccy>2014</expccy>
+  <cvvn>123</cvvn>
+</preauth>

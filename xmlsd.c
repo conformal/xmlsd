@@ -19,8 +19,8 @@ __attribute__((unused)) static const char	*cvstag = "$xmlsd$";
 
 #include "xmlsd.h"
 
-#define XML_PAGE_SIZE		(1024)
-#define XML_MAX_PAGE_SIZE	(4 * XML_PAGE_SIZE)
+#define XMLSD_PAGE_SIZE		(1024)
+#define XML_MAX_PAGE_SIZE	(4 * XMLSD_PAGE_SIZE)
 
 struct xmlsd_context {
 	XML_Parser			xml_parser;
@@ -64,16 +64,16 @@ xmlsd_chardata(void *data, const XML_Char *s, int len)
 		if (len == 0)
 			return;
 
-		ctx->value = malloc(XML_PAGE_SIZE);
+		ctx->value = malloc(XMLSD_PAGE_SIZE);
 		if (ctx->value == NULL)
 			XMLSD_ABORT(xml, XMLSD_ERR_RESOURCE);
-		ctx->tot_size += XML_PAGE_SIZE;
+		ctx->tot_size += XMLSD_PAGE_SIZE;
 	}
 
 	/* check for overflow */
 	if (ctx->value_at + len > ctx->tot_size) {
 		for (newlen = ctx->tot_size; newlen < ctx->value_at + len;
-		    newlen += XML_PAGE_SIZE)
+		    newlen += XMLSD_PAGE_SIZE)
 			;
 
 		if (newlen > XML_MAX_PAGE_SIZE) {
@@ -190,33 +190,52 @@ xmlsd_end(void *data, const char *el)
 }
 
 int
-xmlsd_parse(FILE *f, struct xmlsd_element_list *xl)
+xmlsd_parse_setup(struct xmlsd_context *ctx, struct xmlsd_element_list *xl)
 {
 	XML_Parser		xml;
-	struct xmlsd_context	ctx;
-	int			done, rv = XMLSD_ERR_UNKNOWN, status;
-	size_t			r;
-	char			b[XML_PAGE_SIZE];
 
-	if (xl == NULL)
+	if (ctx == NULL || (xl && !TAILQ_EMPTY(xl)))
 		return (XMLSD_ERR_INTEGRITY);
 
-	TAILQ_INIT(xl);
-
-	bzero(&ctx, sizeof ctx);
-	ctx.depth = -1;
+	bzero(ctx, sizeof *ctx);
+	ctx->depth = -1;
 
 	xml = XML_ParserCreate(NULL);
 	if (xml == NULL)
 		return (XMLSD_ERR_RESOURCE);
 
-	ctx.xml_parser = xml;
-	ctx.xml_el = xl;
+	ctx->xml_parser = xml;
+	ctx->xml_el = xl;
 
-	XML_SetUserData(xml, &ctx);
+	XML_SetUserData(xml, ctx);
 	XML_SetElementHandler(xml, xmlsd_start, xmlsd_end);
 	XML_SetCharacterDataHandler(xml, xmlsd_chardata);
 
+	return (XMLSD_ERR_SUCCES);
+}
+
+void
+xmlsd_parse_done(struct xmlsd_context *ctx)
+{
+	XML_ParserFree(ctx->xml_parser);
+}
+
+int
+xmlsd_parse_file(FILE *f, struct xmlsd_element_list *xl)
+{
+	XML_Parser		xml;
+	struct xmlsd_context	ctx;
+	int			irv, done, rv = XMLSD_ERR_UNKNOWN, status;
+	size_t			r;
+	char			b[XMLSD_PAGE_SIZE];
+
+	if (f == NULL || xl == NULL)
+		return (XMLSD_ERR_INTEGRITY);
+
+	if ((irv = xmlsd_parse_setup(&ctx, xl)) != XMLSD_ERR_SUCCES)
+		return (irv);
+
+	xml = ctx.xml_parser;
 	for (done = 0; done == 0;) {
 		r = fread(b, 1, sizeof b, f);
 		if (ferror(f)) {
@@ -236,7 +255,36 @@ xmlsd_parse(FILE *f, struct xmlsd_element_list *xl)
 
 	rv = XMLSD_ERR_SUCCES;
 done:
-	XML_ParserFree(xml);
+	xmlsd_parse_done(&ctx);
+	return (rv);
+}
+
+int
+xmlsd_parse_mem(char *b, size_t sz, struct xmlsd_element_list *xl)
+{
+	int			irv, status, rv = XMLSD_ERR_UNKNOWN;
+	struct xmlsd_context	ctx;
+	XML_Parser		xml;
+
+	if (b == NULL || sz <= 0 || xl == NULL)
+		return (XMLSD_ERR_INTEGRITY);
+
+	if ((irv = xmlsd_parse_setup(&ctx, xl)) != XMLSD_ERR_SUCCES)
+		return (irv);
+
+	xml = ctx.xml_parser;
+	if (XML_Parse(xml, b, sz, 1) != XML_STATUS_OK) {
+		status = XML_GetErrorCode(xml);
+		if (status == XML_ERROR_ABORTED)
+			rv = xmlsd_error;
+		else
+			rv = XMLSD_ERR_PARSER;
+		goto done;
+	}
+
+	rv = XMLSD_ERR_SUCCES;
+done:
+	xmlsd_parse_done(&ctx);
 	return (rv);
 }
 
