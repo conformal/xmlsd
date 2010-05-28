@@ -6,7 +6,7 @@
 LIB= xmlsd
 SRCS= xmlsd.c
 DEBUG+= -ggdb3 
-CFLAGS+= -Wall
+CFLAGS+= -Wall -Werror
 LDFLAGS+=-lexpat
 #MAN= xmlsd.3
 NOMAN=

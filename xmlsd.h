@@ -23,6 +23,7 @@
 #include <errno.h>
 #include <err.h>
 #include <string.h>
+#include <poll.h>
 #include <expat.h>
 
 #include <sys/queue.h>
@@ -35,6 +36,25 @@
 #define XMLSD_ERR_OVERFLOW	(4)
 #define XMLSD_ERR_INTEGRITY	(5)
 
+#define XMLSD_TIMEOUT		(5 * 1000) /* 5 seconds */
+
+/* validation structures */
+struct xmlsd_v_attr {
+	char			*name;
+};
+
+struct xmlsd_v_elem {
+	char			*element;
+	char			*path;
+	struct xmlsd_v_attr	*attr; /* array of attributes */
+};
+
+struct xmlsd_v_elements {
+	char			*name;
+	struct xmlsd_v_elem	*cmd;
+};
+
+/* regular structures */
 struct xmlsd_attribute {
 	TAILQ_ENTRY(xmlsd_attribute)	entry;
 	char				*name;
@@ -53,6 +73,12 @@ struct xmlsd_element {
 TAILQ_HEAD(xmlsd_element_list, xmlsd_element);
 
 int			xmlsd_unwind(struct xmlsd_element_list *);
+int			xmlsd_parse_fileds(int, struct xmlsd_element_list *);
 int			xmlsd_parse_file(FILE *, struct xmlsd_element_list *);
 int			xmlsd_parse_mem(char *, size_t,
 			    struct xmlsd_element_list *);
+int			xmlsd_check_path(struct xmlsd_element *, char *);
+int			xmlsd_check_attributes(struct xmlsd_element *,
+			    struct xmlsd_v_attr *);
+int			xmlsd_validate(struct xmlsd_element_list *,
+			    struct xmlsd_v_elements *);

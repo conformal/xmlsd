@@ -64,7 +64,7 @@ xmlsd_chardata(void *data, const XML_Char *s, int len)
 		if (len == 0)
 			return;
 
-		ctx->value = malloc(XMLSD_PAGE_SIZE);
+		ctx->value = calloc(1, XMLSD_PAGE_SIZE);
 		if (ctx->value == NULL)
 			XMLSD_ABORT(xml, XMLSD_ERR_RESOURCE);
 		ctx->tot_size += XMLSD_PAGE_SIZE;
@@ -112,9 +112,10 @@ xmlsd_start(void *data, const char *el, const char **attr)
 		errx(1, "xmlsd_start: no context");
 	xml = ctx->xml_parser;
 
-	xe = malloc(sizeof *xe);
+	xe = calloc(1, sizeof *xe);
 	if (xe == NULL)
 		XMLSD_ABORT(xml, XMLSD_ERR_RESOURCE);
+
 	TAILQ_INSERT_TAIL(ctx->xml_el, xe, entry);
 	xe->name = strdup(el);
 	if (xe->name == NULL)
@@ -123,7 +124,7 @@ xmlsd_start(void *data, const char *el, const char **attr)
 
 	for (i = 0; attr[i]; i += 2) {
 		/*fprintf(stderr, "%s -> %s = %s\n", el, attr[i], attr[i + 1]);*/
-		xa = malloc(sizeof *xa);
+		xa = calloc(1, sizeof *xa);
 		if (xa == NULL)
 			XMLSD_ABORT(xml, XMLSD_ERR_RESOURCE);
 		xa->name = strdup(attr[i]);
@@ -218,6 +219,65 @@ void
 xmlsd_parse_done(struct xmlsd_context *ctx)
 {
 	XML_ParserFree(ctx->xml_parser);
+}
+
+int
+xmlsd_parse_fileds(int f, struct xmlsd_element_list *xl)
+{
+	XML_Parser		xml;
+	struct xmlsd_context	ctx;
+	int			irv, done, rv = XMLSD_ERR_UNKNOWN, status;
+	size_t			r;
+	char			b[XMLSD_PAGE_SIZE];
+	struct pollfd		fds[1];
+
+	errx(1, "xmlsd_parse_fileds: UNTESTED");
+
+	if (f <= 0 || xl == NULL)
+		return (XMLSD_ERR_INTEGRITY);
+
+	if ((irv = xmlsd_parse_setup(&ctx, xl)) != XMLSD_ERR_SUCCES)
+		return (irv);
+
+	xml = ctx.xml_parser;
+	for (done = 0; done == 0;) {
+		fds[0].fd = f;
+		fds[0].events = POLLIN;
+		irv = poll(fds, 1, XMLSD_TIMEOUT);
+		if (irv == -1) {
+			if (errno == EINTR || errno == EAGAIN) {
+				fprintf(stderr, "poll %d", errno);
+				continue;
+			}       
+			if (fds[0].revents & (POLLERR | POLLHUP | POLLNVAL))
+				goto done;
+		}
+		if (irv == 0)
+			goto done;
+
+		r = read(f, b, sizeof b);
+		if (r == -1) {
+			if (errno == EINTR || errno == EAGAIN)
+				continue;
+			goto done;
+		}
+		if (r == 0)
+			done = 1;
+
+		if (XML_Parse(xml, b, r, done) != XML_STATUS_OK) {
+			status = XML_GetErrorCode(xml);
+			if (status == XML_ERROR_ABORTED)
+				rv = xmlsd_error;
+			else
+				rv = XMLSD_ERR_PARSER;
+			goto done;
+		}
+	}
+
+	rv = XMLSD_ERR_SUCCES;
+done:
+	xmlsd_parse_done(&ctx);
+	return (rv);
 }
 
 int
@@ -319,3 +379,120 @@ xmlsd_unwind(struct xmlsd_element_list *xl)
 
 	return (XMLSD_ERR_SUCCES);
 }
+
+int
+xmlsd_check_path(struct xmlsd_element *xe, char *path)
+{
+	int			rv = 1;
+	struct xmlsd_element	*current;
+	char			mypath[1024] = { '\0' };
+
+	if (xe == NULL || path == NULL)
+		goto done;
+
+	/* validate root element */
+	if (strlen(path) == 0 && xe->parent == NULL)
+		return (0);
+
+	current = xe;
+	while (current) {
+		if (!current->parent)
+			strlcat(mypath, ".", sizeof mypath);
+		if (strlcat(mypath, current->name, sizeof mypath) >=
+		    sizeof mypath)
+			goto done;
+		current = current->parent;
+	}
+
+	if (strcmp(mypath, path))
+		goto done;
+
+	rv = 0;
+done:
+	return (rv);
+}
+
+int
+xmlsd_check_attributes(struct xmlsd_element *xe, struct xmlsd_v_attr *attrs)
+{
+	struct xmlsd_attribute	*xa;
+	int			i, found, rv = 1;
+
+	TAILQ_FOREACH(xa, &xe->attr_list, entry) {
+		found = 0;
+		for (i = 0; attrs[i].name != NULL; i++)
+			if (!strcmp(attrs[i].name, xa->name)) {
+				found = 1;
+				break;
+			}
+
+		if (found == 0)
+			goto done;
+	}
+
+	rv = 0;
+done:
+	return (rv);
+}
+
+int
+xmlsd_validate(struct xmlsd_element_list *xl, struct xmlsd_v_elements *els)
+{
+	struct xmlsd_element	*xe;
+	struct xmlsd_v_elem	*xc = NULL, *cmd;
+	int			i, rv = 1;
+
+	if (TAILQ_EMPTY(xl))
+		goto done;
+
+	/* find command */
+	xe = TAILQ_FIRST(xl);
+	if (xe == NULL)
+		goto done;
+
+	/* must not have a parent */
+	if (xe->parent)
+		goto done;
+
+	for (i = 0; els[i].name != NULL; i++)
+		if (!strcmp(els[i].name, xe->name))
+			xc = els[i].cmd;
+	if (xc == NULL)
+		goto done;
+
+	/* make sure we are the root element */
+	if (xmlsd_check_path(xe, xc->path))
+		goto done;
+
+	/* check root attributes */
+	if (!TAILQ_EMPTY(&xe->attr_list))
+		if (xmlsd_check_attributes(xe, xc->attr))
+			goto done;
+
+	TAILQ_FOREACH(xe, xl, entry) {
+		/* skip first */
+		if (xe == TAILQ_FIRST(xl))
+			continue;
+
+		/* find element */
+		for (cmd = NULL, i = 0; xc[i].element != NULL; i++)
+			if (!strcmp(xc[i].element, xe->name))
+				cmd = &xc[i];
+		if (cmd == NULL)
+			goto done;
+
+		/* check path */
+		if (xmlsd_check_path(xe, cmd->path))
+			goto done;
+
+		/* check attributes */
+		if (!TAILQ_EMPTY(&xe->attr_list))
+			if (xmlsd_check_attributes(xe, cmd->attr))
+				goto done;
+	}
+
+	rv = 0;
+done:
+	return (rv);
+}
+
