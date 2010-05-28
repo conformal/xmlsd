@@ -82,3 +82,7 @@ int			xmlsd_check_attributes(struct xmlsd_element *,
 			    struct xmlsd_v_attr *);
 int			xmlsd_validate(struct xmlsd_element_list *,
 			    struct xmlsd_v_elements *);
+/* not a fully qualified search */
+char			*xmlsd_get_value(struct xmlsd_element_list *, char *,
+			    struct xmlsd_element **);
+char			*xmlsd_get_attr(struct xmlsd_element *, char *);

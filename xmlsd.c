@@ -496,3 +496,37 @@ done:
 	return (rv);
 }
 
+char *
+xmlsd_get_value(struct xmlsd_element_list *xl, char *findme,
+    struct xmlsd_element **xe_ret)
+{
+	struct xmlsd_element	*xe;
+
+	if (xl == NULL || findme == NULL)
+		return (NULL);
+
+	TAILQ_FOREACH(xe, xl, entry) {
+		if (!strcmp(xe->name, findme)) {
+			if (xe_ret)
+				*xe_ret = xe;
+			return (xe->value);
+		}
+	}
+
+	return (NULL);
+}
+
+char *
+xmlsd_get_attr(struct xmlsd_element *xe, char *findme)
+{
+	struct xmlsd_attribute	*xa;
+
+	if (xe == NULL || findme == NULL)
+		return (NULL);
+
+	TAILQ_FOREACH(xa, &xe->attr_list, entry) {
+		if (!strcmp(xa->name, findme))
+			return (xa->value);
+	}
+	return (NULL);
+}
