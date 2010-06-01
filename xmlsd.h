@@ -86,3 +86,4 @@ int			xmlsd_validate(struct xmlsd_element_list *,
 char			*xmlsd_get_value(struct xmlsd_element_list *, char *,
 			    struct xmlsd_element **);
 char			*xmlsd_get_attr(struct xmlsd_element *, char *);
+int			xmlsd_check_boolean(char *, int *);

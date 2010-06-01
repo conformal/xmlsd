@@ -530,3 +530,29 @@ xmlsd_get_attr(struct xmlsd_element *xe, char *findme)
 	}
 	return (NULL);
 }
+
+int
+xmlsd_check_boolean(char *s, int *v)
+{
+	int			rv = 1, r = -1;
+
+	if (s == NULL)
+		goto done;
+
+	if (!strcmp(s, "true") || !strcmp(s, "1"))
+		r = 1;
+	else if (!strcmp(s, "false") || !strcmp(s, "0"))
+		r = 0;
+	else
+		goto done;
+
+	if (r == -1)
+		goto done;
+
+	if (v)
+		*v = r;
+
+	rv = 0;
+done:
+	return (rv);
+}
