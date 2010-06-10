@@ -15,6 +15,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#ifndef XMLSD_H
+#define XMLSD_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -87,3 +90,5 @@ char			*xmlsd_get_value(struct xmlsd_element_list *, char *,
 			    struct xmlsd_element **);
 char			*xmlsd_get_attr(struct xmlsd_element *, char *);
 int			xmlsd_check_boolean(char *, int *);
+
+#endif /* XMLSD_H */
