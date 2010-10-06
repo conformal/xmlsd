@@ -248,7 +248,7 @@ xmlsd_parse_fileds(int f, struct xmlsd_element_list *xl)
 			if (errno == EINTR || errno == EAGAIN) {
 				fprintf(stderr, "poll %d", errno);
 				continue;
-			}       
+			}
 			if (fds[0].revents & (POLLERR | POLLHUP | POLLNVAL))
 				goto done;
 		}
