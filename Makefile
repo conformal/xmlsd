@@ -1,6 +1,6 @@
 # $xmlsd$
 
-PREFIX?=/usr/local
+PREFIX?=${DESTDIR}/usr/local
 LIBDIR=${PREFIX}/lib
 
 #WANTLINT=
