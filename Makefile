@@ -1,7 +1,7 @@
 # $xmlsd$
 
-PREFIX?=${DESTDIR}/usr/local
-LIBDIR=${PREFIX}/lib
+LOCALBASE?=/usr/local
+LIBDIR=${LOCALBASE}/lib
 
 #WANTLINT=
 LIB= xmlsd
@@ -15,9 +15,9 @@ HDRS= xmlsd.h
 
 afterinstall:
 	@cd ${.CURDIR}; for i in ${HDRS}; do \
-	cmp -s $$i ${PREFIX}/include/$$i || \
-	${INSTALL} ${INSTALL_COPY} -m 444 -o $(BINOWN) -g $(BINGRP) $$i ${PREFIX}/include; \
-	echo ${INSTALL} ${INSTALL_COPY} -m 444 -o $(BINOWN) -g $(BINGRP) $$i ${PREFIX}/include; \
+	cmp -s $$i ${LOCALBASE}/include/$$i || \
+	${INSTALL} ${INSTALL_COPY} -m 444 -o $(BINOWN) -g $(BINGRP) $$i ${DESTDIR}${LOCALBASE}/include; \
+	echo ${INSTALL} ${INSTALL_COPY} -m 444 -o $(BINOWN) -g $(BINGRP) $$i ${DESTDIR}${LOCALBASE}/include; \
 	done
 
 .include <bsd.own.mk>
