@@ -20,14 +20,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <errno.h>
-#include <err.h>
-#include <string.h>
-#include <poll.h>
-#include <expat.h>
 
 #include <sys/queue.h>
 

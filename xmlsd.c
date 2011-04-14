@@ -19,6 +19,15 @@ __attribute__((unused)) static const char	*cvstag = "$xmlsd$";
 
 #include "xmlsd.h"
 
+#include <unistd.h>
+#include <ctype.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <err.h>
+#include <string.h>
+#include <poll.h>
+#include <expat.h>
+
 #define XMLSD_PAGE_SIZE		(1024)
 #define XML_MAX_PAGE_SIZE	(4 * XMLSD_PAGE_SIZE)
 
