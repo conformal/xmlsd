@@ -71,7 +71,7 @@ main(int argc, char *argv[])
 
 	free(b);
 	close(f);
-	f = NULL;
+	f = 0;
 
 	return (0);
 }
