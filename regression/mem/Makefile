@@ -9,6 +9,6 @@ COPT+= -O2
 DEBUG+= -ggdb3 
 CFLAGS+= -Wall
 CFLAGS+= -I../../
-LDFLAGS+= -lexpat -L../../../obj/ -lxmlsd
+LDFLAGS+= -lexpat -L../../ -lxmlsd
 
 .include <bsd.prog.mk>

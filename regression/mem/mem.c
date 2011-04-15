@@ -15,10 +15,14 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "../xmlsd.h"
+#include "../../xmlsd.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <err.h>
+#include <string.h>
 
 #define XMLSD_MEM_MAXSIZE	(10 * 1024 * 1024)
 
