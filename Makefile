@@ -2,12 +2,14 @@
 
 LOCALBASE?=/usr/local
 LIBDIR=${LOCALBASE}/lib
+INCDIR=${LOCALBASE}/include
 
 #WANTLINT=
 LIB= xmlsd
 SRCS= xmlsd.c
 DEBUG+= -ggdb3 
 CFLAGS+= -Wall -Werror
+CFLAGS+= -I${.CURDIR} -I${INCDIR}
 LDADD+=-lexpat
 #MAN= xmlsd.3
 NOMAN=

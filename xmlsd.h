@@ -18,6 +18,8 @@
 #ifndef XMLSD_H
 #define XMLSD_H
 
+#include <clens.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 
