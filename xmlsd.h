@@ -18,7 +18,9 @@
 #ifndef XMLSD_H
 #define XMLSD_H
 
+#ifdef NEED_LIBCLENS
 #include <clens.h>
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
