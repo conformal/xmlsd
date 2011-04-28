@@ -1,5 +1,10 @@
 # $xmlsd$
 
+SYSTEM != uname -s
+.if exists(${.CURDIR}/config/Makefile.$(SYSTEM:L))
+.  include "${.CURDIR}/config/Makefile.$(SYSTEM:L)"
+.endif
+
 LOCALBASE?=/usr/local
 LIBDIR=${LOCALBASE}/lib
 INCDIR=${LOCALBASE}/include
@@ -7,13 +12,14 @@ INCDIR=${LOCALBASE}/include
 #WANTLINT=
 LIB= xmlsd
 SRCS= xmlsd.c
+HDRS= xmlsd.h
+#MAN= xmlsd.3
+NOMAN=
+
 DEBUG+= -ggdb3 
 CFLAGS+= -Wall -Werror
 CFLAGS+= -I${.CURDIR} -I${INCDIR}
 LDADD+=-lexpat
-#MAN= xmlsd.3
-NOMAN=
-HDRS= xmlsd.h
 
 afterinstall:
 	@cd ${.CURDIR}; for i in ${HDRS}; do \

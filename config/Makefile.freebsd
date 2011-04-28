@@ -1,0 +1,11 @@
+# $xmlsd$
+
+.include "${.CURDIR}/shlib_version"
+SHLIB_MAJOR=${major}
+
+MANDIR=$(LOCALBASE)/man/man
+
+CFLAGS+= -fdiagnostics-show-option
+CFLAGS+= -DNEED_LIBCLENS
+LDADD+= -L ${LIBDIR} -lclens
+NO_MAN=
