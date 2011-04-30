@@ -30,12 +30,12 @@ afterinstall:
 
 uninstall:
 	@for i in $(HDRS); do \
-	echo rm -f ${INCDIR}/$$i ;\
+	echo rm -f ${INCDIR}/$$i; \
 	rm -f ${INCDIR}/$$i; \
 	done
 
 	@for i in $(_LIBS); do \
-	echo rm -f ${LIBDIR}/$$i ;\
+	echo rm -f ${LIBDIR}/$$i; \
 	rm -f ${LIBDIR}/$$i; \
 	done
 
