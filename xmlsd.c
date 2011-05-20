@@ -405,7 +405,7 @@ xmlsd_check_path(struct xmlsd_element *xe, char *path)
 
 	current = xe;
 	while (current) {
-		if (!current->parent)
+		if (xe != current)
 			strlcat(mypath, ".", sizeof mypath);
 		if (strlcat(mypath, current->name, sizeof mypath) >=
 		    sizeof mypath)
