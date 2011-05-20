@@ -485,13 +485,10 @@ xmlsd_validate(struct xmlsd_element_list *xl, struct xmlsd_v_elements *els)
 
 		/* find element */
 		for (cmd = NULL, i = 0; xc[i].element != NULL; i++)
-			if (!strcmp(xc[i].element, xe->name))
+			if (!strcmp(xc[i].element, xe->name) &&
+			    !xmlsd_check_path(xe, xc[i].path))
 				cmd = &xc[i];
 		if (cmd == NULL)
-			goto done;
-
-		/* check path */
-		if (xmlsd_check_path(xe, cmd->path))
 			goto done;
 
 		/* check attributes */
