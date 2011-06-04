@@ -427,6 +427,9 @@ xmlsd_check_attributes(struct xmlsd_element *xe, struct xmlsd_v_attr *attrs)
 	struct xmlsd_attribute	*xa;
 	int			i, found, rv = 1;
 
+	if (!attrs)
+		goto done;
+
 	TAILQ_FOREACH(xa, &xe->attr_list, entry) {
 		found = 0;
 		for (i = 0; attrs[i].name != NULL; i++)
