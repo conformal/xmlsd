@@ -15,8 +15,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-__attribute__((unused)) static const char	*cvstag = "$xmlsd$";
-
 #include "xmlsd.h"
 
 #include <unistd.h>
@@ -27,6 +25,9 @@ __attribute__((unused)) static const char	*cvstag = "$xmlsd$";
 #include <string.h>
 #include <poll.h>
 #include <expat.h>
+
+static const char *cvstag = "$xmlsd$";
+static const char *vertag = "version: " XMLSD_VERSION;
 
 #define XMLSD_PAGE_SIZE		(1024)
 #define XML_MAX_PAGE_SIZE	(4 * XMLSD_PAGE_SIZE)
@@ -47,6 +48,17 @@ static int			xmlsd_error = XMLSD_ERR_UNKNOWN;
 					XML_StopParser(_xml, XML_FALSE);\
 					return;				\
 				} while (0)
+
+void
+xmlsd_version(int *major, int *minor, int *patch)
+{
+	*major = XMLSD_VERSION_MAJOR;
+	*minor = XMLSD_VERSION_MINOR;
+	*patch = XMLSD_VERSION_PATCH;
+	/* Portable way to avoid unused variable compile warnings */
+	(void) (cvstag);
+	(void) (vertag);
+}
 
 void
 xmlsd_chardata(void *data, const XML_Char *s, int len)
