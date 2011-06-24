@@ -42,7 +42,7 @@ LDFLAGS += -lclens
 SHARED_OBJ_EXT ?= o
 
 LIB.NAME = xmlsd
-LIB.SRCS = xmlsd.c
+LIB.SRCS = xmlsd.c xmlsd_generate.c
 LIB.HEADERS = xmlsd.h
 LIB.OBJS = $(addprefix $(OBJPREFIX), $(LIB.SRCS:.c=.o))
 LIB.SOBJS = $(addprefix $(OBJPREFIX), $(LIB.SRCS:.c=.$(SHARED_OBJ_EXT)))

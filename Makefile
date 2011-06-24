@@ -11,7 +11,7 @@ INCDIR=${LOCALBASE}/include
 
 #WANTLINT=
 LIB= xmlsd
-SRCS= xmlsd.c
+SRCS= xmlsd.c xmlsd_generate.c
 HDRS= xmlsd.h
 #MAN= xmlsd.3
 NOMAN=

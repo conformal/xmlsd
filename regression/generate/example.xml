@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+
+<level0 version="1">
+  <level1a l1a_attr="l1a"/>
+  <level1b l1b_attr="l1b"></level1b>
+  <level1c l1c_attr="l1c">something</level1c>
+  <level1d l1d_attr="l1d">
+    <level2 name="a" l2a_attr0="0" l2a_attrf="1"/>
+    <level2 name="b" l2b_attr0="0">
+      <level3>
+        <level4>
+          <level5>
+            <level6>
+              <level7>
+                <level8>
+                  <level9>
+                    <level10>
+                      <level11>foo</level11>
+                    </level10>
+                  </level9>
+                </level8>
+              </level7>
+            </level6>
+          </level5>
+        </level4>
+      </level3>
+    </level2>
+    <level2 name="c" l2c_attr0="0">
+      <level3b name="l3b"/>
+    </level2>
+  </level1d>
+</level0>
