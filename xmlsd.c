@@ -44,7 +44,7 @@ struct xmlsd_context {
 
 static int			xmlsd_error = XMLSD_ERR_UNKNOWN;
 #define XMLSD_ABORT(_xml, _rv)	do {					\
-					xmlsd_error = _rv; 		\
+					xmlsd_error = _rv;		\
 					XML_StopParser(_xml, XML_FALSE);\
 					return;				\
 				} while (0)
