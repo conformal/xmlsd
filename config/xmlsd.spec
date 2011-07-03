@@ -14,6 +14,7 @@ URL:		http://opensource.conformal.com/wiki/xmlsd
 Source: 	%{name}-%{version}.tar.gz
 Buildroot:	%{_tmppath}/%{name}-%{version}-buildroot
 Prefix: 	/usr
+Requires:	expat >= 2.0.1
 
 %description
 xmlsd is a library that wraps expat in order to simplify XML use in C programs
@@ -43,7 +44,7 @@ make install DESTDIR=$RPM_BUILD_ROOT LOCALBASE=/usr
 %package devel
 Summary: Libraries and header files to develop applications using xmlsd
 Group: Development/Libraries
-Requires: clens >= 0.0.5
+Requires: clens >= 0.0.5, expat-devel >= 2.0.1
 
 %description devel
 This package contains the libraries, include files, and documentation to
