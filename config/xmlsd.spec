@@ -44,7 +44,7 @@ make install DESTDIR=$RPM_BUILD_ROOT LOCALBASE=/usr
 %package devel
 Summary: Libraries and header files to develop applications using xmlsd
 Group: Development/Libraries
-Requires: clens >= 0.0.5, expat-devel >= 2.0.1
+Requires: clens-devel >= 0.0.5, expat-devel >= 2.0.1
 
 %description devel
 This package contains the libraries, include files, and documentation to
