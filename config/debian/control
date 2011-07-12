@@ -1,0 +1,33 @@
+Source: xmlsd
+Priority: optional
+Maintainer: Conformal Systems LLC <package-discuss@conformal.com>
+Build-Depends: debhelper (>= 7), libc6-dev, locales
+Standards-Version: 3.8.3
+Section: libs
+Homepage: http://opensource.conformal.com/wiki/xmlsd
+
+Package: libxmlsd-dev
+Section: libdevel
+Architecture: any
+Depends: libclens-dev (>= 0.0.5), libexpat1-dev (>= 2.0.1),
+         libxmlsd (= ${binary:Version})
+Description: Library that provides various logging services - development
+ This package contains the libraries, include files, and documentation
+ to develop applications with xmlsd.
+ xmlsd is a library that wraps expat in order to simplify XML use in C programs
+ as well as adding rigid rules to an XML structure. The idea is to have XML
+ structures that can be passed over the network with implicit parameter
+ verification. This in turn enables back and forth chattering between
+ applications.
+
+Package: libxmlsd
+Section: libs
+Architecture: any
+Depends: libexpat1 (>= 2.0.1), ${shlibs:Depends}, ${misc:Depends}
+Description: Library that provides various logging services - runtime
+ This package contains the runtime, shared library of xmlsd.
+ xmlsd is a library that wraps expat in order to simplify XML use in C programs
+ as well as adding rigid rules to an XML structure. The idea is to have XML
+ structures that can be passed over the network with implicit parameter
+ verification. This in turn enables back and forth chattering between
+ applications.
