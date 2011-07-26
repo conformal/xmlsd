@@ -1,7 +1,7 @@
 # $xmlsd$
 
 %define name		xmlsd
-%define version		0.3.1
+%define version		0.4.0
 %define release		1
 
 Name: 		%{name}
@@ -57,5 +57,8 @@ develop applications with xmlsd.
 /usr/lib/libxmlsd.a
 
 %changelog
+* Tue Jul 26 2011 - davec 0.4.0-1
+- Add new XML code generation APIs
+- Don't link against clens directly from library
 * Tue Jul 03 2011 - davec 0.3.1-1
 - Create

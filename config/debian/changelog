@@ -1,3 +1,10 @@
+xmlsd (0.4.0-1) unstable; urgency=low
+
+  * Add new XML code generation APIs
+  * Don't link against clens directly from library
+
+ -- Conformal Systems <package-discuss@conformal.com>  Tue, 26 Jul 2011 17:56:23 -0500
+
 xmlsd (0.3.1-1) unstable; urgency=low
 
   * Initial release
