@@ -99,6 +99,12 @@ int			xmlsd_check_boolean(char *, int *);
 char *xmlsd_generate(struct xmlsd_element_list *xl, void *(*alloc_fn)(size_t));
 struct xmlsd_element *xmlsd_create(struct xmlsd_element_list *, char *);
 int xmlsd_set_attr(struct xmlsd_element *, char *, char *);
+int xmlsd_set_attr_int32(struct xmlsd_element *, char *, int32_t);
+int xmlsd_set_attr_uint32(struct xmlsd_element *, char *, uint32_t);
+int xmlsd_set_attr_int64(struct xmlsd_element *, char *, int64_t);
+int xmlsd_set_attr_uint64(struct xmlsd_element *, char *, uint64_t);
+int xmlsd_set_attr_x32(struct xmlsd_element *, char *, uint32_t);
+int xmlsd_set_attr_x64(struct xmlsd_element *, char *, uint64_t);
 int xmlsd_set_value(struct xmlsd_element *, char *);
 struct xmlsd_element *xmld_add_element(struct xmlsd_element_list *,
     struct xmlsd_element *, char *);

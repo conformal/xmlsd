@@ -15,6 +15,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 #include <string.h>
+#include <stdio.h>
+#include <inttypes.h>
 #include "xmlsd.h"
 
 //#define NL "\r\n"
@@ -98,6 +100,8 @@ xmlsd_create(struct xmlsd_element_list *xl, char *name)
 {
 	struct xmlsd_element *xe;
 
+        TAILQ_INIT(xl);
+
         xe = calloc(1, sizeof *xe);
         if (xe == NULL)
 		goto fail;
@@ -118,6 +122,102 @@ fail:
 			free(xe);
 	}
 	return NULL;
+}
+
+int
+xmlsd_set_attr_int32(struct xmlsd_element *xe, char *name, int32_t ival)
+{
+	char *buf;
+	int rv;
+	asprintf(&buf, "%d", ival);
+	if (buf == NULL)
+		return 1;
+
+	rv = xmlsd_set_attr(xe, name, buf);
+
+	if (rv)
+		free(buf);
+	return rv;
+}
+
+int
+xmlsd_set_attr_uint32(struct xmlsd_element *xe, char *name, uint32_t ival)
+{
+	char *buf;
+	int rv;
+	asprintf(&buf, "%u", ival);
+	if (buf == NULL)
+		return 1;
+
+	rv = xmlsd_set_attr(xe, name, buf);
+
+	if (rv)
+		free(buf);
+	return rv;
+}
+
+int
+xmlsd_set_attr_int64(struct xmlsd_element *xe, char *name, int64_t ival)
+{
+	char *buf;
+	int rv;
+	asprintf(&buf, "%" PRId64, ival);
+	if (buf == NULL)
+		return 1;
+
+	rv = xmlsd_set_attr(xe, name, buf);
+
+	if (rv)
+		free(buf);
+	return rv;
+}
+
+int
+xmlsd_set_attr_uint64(struct xmlsd_element *xe, char *name, uint64_t ival)
+{
+	char *buf;
+	int rv;
+	asprintf(&buf, "%" PRIu64, ival);
+	if (buf == NULL)
+		return 1;
+
+	rv = xmlsd_set_attr(xe, name, buf);
+
+	if (rv)
+		free(buf);
+	return rv;
+}
+
+int
+xmlsd_set_attr_x32(struct xmlsd_element *xe, char *name, uint32_t ival)
+{
+	char *buf;
+	int rv;
+	asprintf(&buf, "0x%x", ival);
+	if (buf == NULL)
+		return 1;
+
+	rv = xmlsd_set_attr(xe, name, buf);
+
+	if (rv)
+		free(buf);
+	return rv;
+}
+
+int
+xmlsd_set_attr_x64(struct xmlsd_element *xe, char *name, uint64_t ival)
+{
+	char *buf;
+	int rv;
+	asprintf(&buf, "0x%" PRIx64, ival);
+	if (buf == NULL)
+		return 1;
+
+	rv = xmlsd_set_attr(xe, name, buf);
+
+	if (rv)
+		free(buf);
+	return rv;
 }
 
 int
