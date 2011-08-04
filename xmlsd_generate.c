@@ -19,8 +19,7 @@
 #include <inttypes.h>
 #include "xmlsd.h"
 
-//#define NL "\r\n"
-#define NL "\n"
+#define NL "\r\n"
 
 char *
 xmlsd_generate(struct xmlsd_element_list *xl, void *(*alloc_fn)(size_t))
@@ -41,6 +40,9 @@ xmlsd_generate(struct xmlsd_element_list *xl, void *(*alloc_fn)(size_t))
 			max_depth = xe->depth;
 	}
 	depthname = calloc(max_depth+1, sizeof *depthname);
+	if (depthname == NULL)
+		return NULL;
+
 for_real:
 	buf = obuf;
 
