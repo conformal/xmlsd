@@ -22,7 +22,8 @@
 #define NL "\r\n"
 
 char *
-xmlsd_generate(struct xmlsd_element_list *xl, void *(*alloc_fn)(size_t))
+xmlsd_generate(struct xmlsd_element_list *xl, void *(*alloc_fn)(size_t),
+    size_t *xmlszp, int withhdr)
 {
         struct xmlsd_element	*xe, *xe_next;
         struct xmlsd_attribute 	*xa;
@@ -46,8 +47,10 @@ xmlsd_generate(struct xmlsd_element_list *xl, void *(*alloc_fn)(size_t))
 for_real:
 	buf = obuf;
 
-	obuf += snprintf(obuf, buf ? bufsz - (obuf-buf) : 0,
-	    "<?xml version=\"1.0\"?>" NL NL);
+	if (withhdr) {
+		obuf += snprintf(obuf, buf ? bufsz - (obuf-buf) : 0,
+		    "<?xml version=\"1.0\"?>" NL NL);
+	}
 	TAILQ_FOREACH(xe, xl, entry) {
 		depthname[xe->depth] = xe->name;
 		obuf += snprintf(obuf, buf ? bufsz - (obuf-buf) : 0,
@@ -89,8 +92,11 @@ for_real:
 		bufsz = obuf - buf;
 		bufsz += 1; /* include NUL */
 		obuf = alloc_fn(bufsz);
-		if (obuf != NULL)
+		if (obuf != NULL) {
+			if (xmlszp != NULL)
+				*xmlszp = bufsz;
 			goto for_real;
+		}
 	}
 	
 	return buf;

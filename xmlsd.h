@@ -97,7 +97,8 @@ char			*xmlsd_get_attr(struct xmlsd_element *, char *);
 int			xmlsd_check_boolean(char *, int *);
 
 /* xml generate code */
-char *xmlsd_generate(struct xmlsd_element_list *xl, void *(*alloc_fn)(size_t));
+char *xmlsd_generate(struct xmlsd_element_list *xl, void *(*alloc_fn)(size_t),
+    size_t *, int);
 struct xmlsd_element *xmlsd_create(struct xmlsd_element_list *, char *);
 int xmlsd_set_attr(struct xmlsd_element *, char *, char *);
 int xmlsd_set_attr_int32(struct xmlsd_element *, char *, int32_t);
