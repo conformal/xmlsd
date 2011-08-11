@@ -267,7 +267,7 @@ xmlsd_set_value(struct xmlsd_element *xe, char *value)
 }
 
 struct xmlsd_element *
-xmld_add_element(struct xmlsd_element_list *xl, struct xmlsd_element *xe,
+xmlsd_add_element(struct xmlsd_element_list *xl, struct xmlsd_element *xe,
     char *name)
 {
 	struct xmlsd_element *nxe, *prev, *next;
