@@ -108,7 +108,7 @@ int xmlsd_set_attr_uint64(struct xmlsd_element *, char *, uint64_t);
 int xmlsd_set_attr_x32(struct xmlsd_element *, char *, uint32_t);
 int xmlsd_set_attr_x64(struct xmlsd_element *, char *, uint64_t);
 int xmlsd_set_value(struct xmlsd_element *, char *);
-struct xmlsd_element *xmld_add_element(struct xmlsd_element_list *,
+struct xmlsd_element *xmlsd_add_element(struct xmlsd_element_list *,
     struct xmlsd_element *, char *);
 
 
