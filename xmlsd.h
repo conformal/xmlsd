@@ -110,6 +110,7 @@ int xmlsd_set_attr_x64(struct xmlsd_element *, char *, uint64_t);
 int xmlsd_set_value(struct xmlsd_element *, char *);
 struct xmlsd_element *xmlsd_add_element(struct xmlsd_element_list *,
     struct xmlsd_element *, char *);
-
+void xmlsd_remove_element(struct xmlsd_element_list *, struct xmlsd_element *);
+void xmlsd_free_element(struct xmlsd_element *);
 
 #endif /* XMLSD_H */

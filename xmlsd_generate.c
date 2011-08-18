@@ -34,6 +34,8 @@ xmlsd_generate(struct xmlsd_element_list *xl, void *(*alloc_fn)(size_t),
 
 	obuf = NULL;
 	bufsz = 0;
+	if (xmlszp != NULL)
+		*xmlszp = -1;
 
 	max_depth = -1;
 	TAILQ_FOREACH(xe, xl, entry) {
@@ -301,6 +303,49 @@ fail:
 			free(nxe);
 	}
 	return NULL;
+}
+
+void
+xmlsd_free_element(struct xmlsd_element *xe)
+{
+	struct xmlsd_attribute	*xa;
+
+	if (xe == NULL)
+		return;
+
+	/* free attributes */
+	while ((xa = TAILQ_FIRST(&xe->attr_list))) {
+		TAILQ_REMOVE(&xe->attr_list, xa, entry);
+		if (xa->name)
+			free(xa->name);
+		if (xa->value)
+			free(xa->value);
+	}
+
+	/* free element */
+	if (xe->name)
+		free(xe->name);
+	if (xe->value)
+		free(xe->value);
+
+	free(xe);
+}
+
+void
+xmlsd_remove_element(struct xmlsd_element_list *xl, struct xmlsd_element *xe)
+{
+	struct xmlsd_element *next;
+	const int depth = xe->depth;
+
+	if (xe == NULL || TAILQ_EMPTY(xl))
+		return;
+
+	do {
+		next = TAILQ_NEXT(xe, entry);
+		TAILQ_REMOVE(xl, xe, entry);
+		xmlsd_free_element(xe);
+		xe = next;
+	} while (xe && xe->depth < depth);
 }
 
 #if 0

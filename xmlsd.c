@@ -372,30 +372,13 @@ done:
 int
 xmlsd_unwind(struct xmlsd_element_list *xl)
 {
-	struct xmlsd_element		*xe;
-	struct xmlsd_attribute		*xa;
+	struct xmlsd_element *xe;
 
 	if (xl == NULL)
 		return (XMLSD_ERR_INTEGRITY);
 
 	while ((xe = TAILQ_FIRST(xl))) {
-		TAILQ_REMOVE(xl, xe, entry);
-
-		/* free attributes */
-		while ((xa = TAILQ_FIRST(&xe->attr_list))) {
-			TAILQ_REMOVE(&xe->attr_list, xa, entry);
-			if (xa->name)
-				free(xa->name);
-			if (xa->value)
-				free(xa->value);
-		}
-
-		/* free element */
-		if (xe->name)
-			free(xe->name);
-		if (xe->value)
-			free(xe->value);
-		free(xe);
+		xmlsd_remove_element(xl, xe);
 	}
 
 	return (XMLSD_ERR_SUCCES);
