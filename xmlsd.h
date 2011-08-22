@@ -99,17 +99,17 @@ int			xmlsd_check_boolean(char *, int *);
 /* xml generate code */
 char *xmlsd_generate(struct xmlsd_element_list *xl, void *(*alloc_fn)(size_t),
     size_t *, int);
-struct xmlsd_element *xmlsd_create(struct xmlsd_element_list *, char *);
-int xmlsd_set_attr(struct xmlsd_element *, char *, char *);
-int xmlsd_set_attr_int32(struct xmlsd_element *, char *, int32_t);
-int xmlsd_set_attr_uint32(struct xmlsd_element *, char *, uint32_t);
-int xmlsd_set_attr_int64(struct xmlsd_element *, char *, int64_t);
-int xmlsd_set_attr_uint64(struct xmlsd_element *, char *, uint64_t);
-int xmlsd_set_attr_x32(struct xmlsd_element *, char *, uint32_t);
-int xmlsd_set_attr_x64(struct xmlsd_element *, char *, uint64_t);
-int xmlsd_set_value(struct xmlsd_element *, char *);
+struct xmlsd_element *xmlsd_create(struct xmlsd_element_list *, const char *);
+int xmlsd_set_attr(struct xmlsd_element *, const char *, const char *);
+int xmlsd_set_attr_int32(struct xmlsd_element *, const char *, int32_t);
+int xmlsd_set_attr_uint32(struct xmlsd_element *, const char *, uint32_t);
+int xmlsd_set_attr_int64(struct xmlsd_element *, const char *, int64_t);
+int xmlsd_set_attr_uint64(struct xmlsd_element *, const char *, uint64_t);
+int xmlsd_set_attr_x32(struct xmlsd_element *, const char *, uint32_t);
+int xmlsd_set_attr_x64(struct xmlsd_element *, const char *, uint64_t);
+int xmlsd_set_value(struct xmlsd_element *, const char *);
 struct xmlsd_element *xmlsd_add_element(struct xmlsd_element_list *,
-    struct xmlsd_element *, char *);
+    struct xmlsd_element *, const char *);
 void xmlsd_remove_element(struct xmlsd_element_list *, struct xmlsd_element *);
 void xmlsd_free_element(struct xmlsd_element *);
 

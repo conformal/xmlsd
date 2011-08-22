@@ -135,7 +135,7 @@ fail:
 }
 
 int
-xmlsd_set_attr_int32(struct xmlsd_element *xe, char *name, int32_t ival)
+xmlsd_set_attr_int32(struct xmlsd_element *xe, const char *name, int32_t ival)
 {
 	char *buf;
 	int rv;
@@ -145,13 +145,13 @@ xmlsd_set_attr_int32(struct xmlsd_element *xe, char *name, int32_t ival)
 
 	rv = xmlsd_set_attr(xe, name, buf);
 
-	if (rv)
-		free(buf);
+	free(buf);
+
 	return rv;
 }
 
 int
-xmlsd_set_attr_uint32(struct xmlsd_element *xe, char *name, uint32_t ival)
+xmlsd_set_attr_uint32(struct xmlsd_element *xe, const char *name, uint32_t ival)
 {
 	char *buf;
 	int rv;
@@ -161,13 +161,13 @@ xmlsd_set_attr_uint32(struct xmlsd_element *xe, char *name, uint32_t ival)
 
 	rv = xmlsd_set_attr(xe, name, buf);
 
-	if (rv)
-		free(buf);
+	free(buf);
+
 	return rv;
 }
 
 int
-xmlsd_set_attr_int64(struct xmlsd_element *xe, char *name, int64_t ival)
+xmlsd_set_attr_int64(struct xmlsd_element *xe, const char *name, int64_t ival)
 {
 	char *buf;
 	int rv;
@@ -177,13 +177,13 @@ xmlsd_set_attr_int64(struct xmlsd_element *xe, char *name, int64_t ival)
 
 	rv = xmlsd_set_attr(xe, name, buf);
 
-	if (rv)
-		free(buf);
+	free(buf);
+
 	return rv;
 }
 
 int
-xmlsd_set_attr_uint64(struct xmlsd_element *xe, char *name, uint64_t ival)
+xmlsd_set_attr_uint64(struct xmlsd_element *xe, const char *name, uint64_t ival)
 {
 	char *buf;
 	int rv;
@@ -193,13 +193,13 @@ xmlsd_set_attr_uint64(struct xmlsd_element *xe, char *name, uint64_t ival)
 
 	rv = xmlsd_set_attr(xe, name, buf);
 
-	if (rv)
-		free(buf);
+	free(buf);
+
 	return rv;
 }
 
 int
-xmlsd_set_attr_x32(struct xmlsd_element *xe, char *name, uint32_t ival)
+xmlsd_set_attr_x32(struct xmlsd_element *xe, const char *name, uint32_t ival)
 {
 	char *buf;
 	int rv;
@@ -209,13 +209,13 @@ xmlsd_set_attr_x32(struct xmlsd_element *xe, char *name, uint32_t ival)
 
 	rv = xmlsd_set_attr(xe, name, buf);
 
-	if (rv)
-		free(buf);
+	free(buf);
+
 	return rv;
 }
 
 int
-xmlsd_set_attr_x64(struct xmlsd_element *xe, char *name, uint64_t ival)
+xmlsd_set_attr_x64(struct xmlsd_element *xe, const char *name, uint64_t ival)
 {
 	char *buf;
 	int rv;
@@ -225,13 +225,13 @@ xmlsd_set_attr_x64(struct xmlsd_element *xe, char *name, uint64_t ival)
 
 	rv = xmlsd_set_attr(xe, name, buf);
 
-	if (rv)
-		free(buf);
+	free(buf);
+
 	return rv;
 }
 
 int
-xmlsd_set_attr(struct xmlsd_element *xe, char *name, char *value)
+xmlsd_set_attr(struct xmlsd_element *xe, const char *name, const char *value)
 {
 	struct xmlsd_attribute *xa;
         xa = calloc(1, sizeof *xe);
@@ -258,7 +258,7 @@ fail:
 }
 
 int
-xmlsd_set_value(struct xmlsd_element *xe, char *value)
+xmlsd_set_value(struct xmlsd_element *xe, const char *value)
 {
 	if (xe->value)
 		free(xe->value);
@@ -270,7 +270,7 @@ xmlsd_set_value(struct xmlsd_element *xe, char *value)
 
 struct xmlsd_element *
 xmlsd_add_element(struct xmlsd_element_list *xl, struct xmlsd_element *xe,
-    char *name)
+    const char *name)
 {
 	struct xmlsd_element *nxe, *prev, *next;
 
@@ -282,6 +282,7 @@ xmlsd_add_element(struct xmlsd_element_list *xl, struct xmlsd_element *xe,
 		goto fail;
         TAILQ_INIT(&nxe->attr_list);
 	nxe->depth = xe->depth+1;
+	nxe->parent = xe;
 
 	/* figure out where to insert node! */
 	
