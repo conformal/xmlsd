@@ -106,7 +106,7 @@ for_real:
     
 
 struct xmlsd_element *
-xmlsd_create(struct xmlsd_element_list *xl, char *name)
+xmlsd_create(struct xmlsd_element_list *xl, const char *name)
 {
 	struct xmlsd_element *xe;
 
