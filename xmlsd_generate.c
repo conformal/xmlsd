@@ -335,12 +335,12 @@ xmlsd_free_element(struct xmlsd_element *xe)
 void
 xmlsd_remove_element(struct xmlsd_element_list *xl, struct xmlsd_element *xe)
 {
-	struct xmlsd_element *next;
-	const int depth = xe->depth;
+	struct xmlsd_element	*next;
+	int			 depth;
 
 	if (xe == NULL || TAILQ_EMPTY(xl))
 		return;
-
+	depth = xe->depth;
 	do {
 		next = TAILQ_NEXT(xe, entry);
 		TAILQ_REMOVE(xl, xe, entry);
