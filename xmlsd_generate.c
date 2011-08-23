@@ -346,7 +346,7 @@ xmlsd_remove_element(struct xmlsd_element_list *xl, struct xmlsd_element *xe)
 		TAILQ_REMOVE(xl, xe, entry);
 		xmlsd_free_element(xe);
 		xe = next;
-	} while (xe && xe->depth < depth);
+	} while (xe && xe->depth > depth);
 }
 
 #if 0
