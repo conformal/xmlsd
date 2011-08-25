@@ -139,7 +139,8 @@ xmlsd_set_attr_int32(struct xmlsd_element *xe, const char *name, int32_t ival)
 {
 	char *buf;
 	int rv;
-	asprintf(&buf, "%d", ival);
+	if (asprintf(&buf, "%d", ival) == -1)
+		return 1;
 	if (buf == NULL)
 		return 1;
 
@@ -155,7 +156,8 @@ xmlsd_set_attr_uint32(struct xmlsd_element *xe, const char *name, uint32_t ival)
 {
 	char *buf;
 	int rv;
-	asprintf(&buf, "%u", ival);
+	if (asprintf(&buf, "%u", ival) == -1)
+		return 1;
 	if (buf == NULL)
 		return 1;
 
@@ -171,7 +173,8 @@ xmlsd_set_attr_int64(struct xmlsd_element *xe, const char *name, int64_t ival)
 {
 	char *buf;
 	int rv;
-	asprintf(&buf, "%" PRId64, ival);
+	if (asprintf(&buf, "%" PRId64, ival) == -1)
+		return 1;
 	if (buf == NULL)
 		return 1;
 
@@ -187,7 +190,8 @@ xmlsd_set_attr_uint64(struct xmlsd_element *xe, const char *name, uint64_t ival)
 {
 	char *buf;
 	int rv;
-	asprintf(&buf, "%" PRIu64, ival);
+	if (asprintf(&buf, "%" PRIu64, ival) == -1)
+		return 1;
 	if (buf == NULL)
 		return 1;
 
@@ -203,7 +207,8 @@ xmlsd_set_attr_x32(struct xmlsd_element *xe, const char *name, uint32_t ival)
 {
 	char *buf;
 	int rv;
-	asprintf(&buf, "0x%x", ival);
+	if (asprintf(&buf, "0x%x", ival) == -1)
+		return 1;
 	if (buf == NULL)
 		return 1;
 
@@ -219,7 +224,8 @@ xmlsd_set_attr_x64(struct xmlsd_element *xe, const char *name, uint64_t ival)
 {
 	char *buf;
 	int rv;
-	asprintf(&buf, "0x%" PRIx64, ival);
+	if (asprintf(&buf, "0x%" PRIx64, ival) == -1)
+		return 1;
 	if (buf == NULL)
 		return 1;
 
