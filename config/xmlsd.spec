@@ -1,7 +1,7 @@
 # $xmlsd$
 
 %define name		xmlsd
-%define version		0.4.0
+%define version		0.5.0
 %define release		1
 
 Name: 		%{name}
@@ -57,6 +57,12 @@ develop applications with xmlsd.
 /usr/lib/libxmlsd.a
 
 %changelog
+* Tue Aug 25 2011 - davec 0.5.0-1
+- Add set attribute functions for various types to XML generation API
+- Modify xmlsd_generate to take two additional parameters for size of
+  generated XML and a flag to determine whether an XML declaration is
+  prepended
+- Change prototypes of all string parameters which aren't modified to const
 * Tue Jul 26 2011 - davec 0.4.0-1
 - Add new XML code generation APIs
 - Don't link against clens directly from library

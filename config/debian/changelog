@@ -1,3 +1,13 @@
+xmlsd (0.5.0-1) unstable; urgency=low
+
+  * Add set attribute functions for various types to XML generation API
+  * Modify xmlsd_generate to take two additional parameters for size of
+    generated XML and a flag to determine whether an XML declaration is
+    prepended
+  * Change prototypes of all string parameters which aren't modified to const
+
+ -- Conformal Systems <package-discuss@conformal.com>  Thu, 25 Aug 2011 13:55:35 -0500
+
 xmlsd (0.4.0-1) unstable; urgency=low
 
   * Add new XML code generation APIs

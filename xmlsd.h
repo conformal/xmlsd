@@ -30,9 +30,9 @@
 
 /* versioning */
 #define XMLSD_VERSION_MAJOR	0
-#define XMLSD_VERSION_MINOR	4
+#define XMLSD_VERSION_MINOR	5
 #define XMLSD_VERSION_PATCH	0
-#define XMLSD_VERSION		"0.4.0"
+#define XMLSD_VERSION		"0.5.0"
 
 void	xmlsd_version(int *major, int *minor, int *patch);
 
