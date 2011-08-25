@@ -10,7 +10,7 @@ Package: libxmlsd-dev
 Section: libdevel
 Architecture: any
 Depends: libclens-dev (>= 0.0.5), libexpat1-dev (>= 2.0.1),
-         libxmlsd0 (= ${binary:Version})
+         libxmlsd1 (= ${binary:Version})
 Description: Library that provides various logging services - development
  This package contains the libraries, include files, and documentation
  to develop applications with xmlsd.
@@ -20,7 +20,7 @@ Description: Library that provides various logging services - development
  verification. This in turn enables back and forth chattering between
  applications.
 
-Package: libxmlsd0
+Package: libxmlsd1
 Section: libs
 Architecture: any
 Depends: libexpat1 (>= 2.0.1), ${shlibs:Depends}, ${misc:Depends}
