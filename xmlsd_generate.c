@@ -239,13 +239,20 @@ xmlsd_set_attr_x64(struct xmlsd_element *xe, const char *name, uint64_t ival)
 int
 xmlsd_set_attr(struct xmlsd_element *xe, const char *name, const char *value)
 {
-	struct xmlsd_attribute *xa;
+	struct xmlsd_attribute *xa = NULL;
+
+	if (xe == NULL || name == NULL || value == NULL)
+		goto fail;
+		
         xa = calloc(1, sizeof *xe);
+
         if (xa == NULL)
 		goto fail;
+
 	xa->name = strdup(name);
         if (xa->name == NULL)
 		goto fail;
+
 	xa->value = strdup(value);
         if (xa->value == NULL)
 		goto fail;
@@ -253,6 +260,7 @@ xmlsd_set_attr(struct xmlsd_element *xe, const char *name, const char *value)
 	TAILQ_INSERT_TAIL(&xe->attr_list, xa, entry);
 
 	return 0;
+
 fail:
 	if (xa) {
 		if (xa->name)
