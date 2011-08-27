@@ -37,6 +37,9 @@ xmlsd_generate(struct xmlsd_element_list *xl, void *(*alloc_fn)(size_t),
 	if (xmlszp != NULL)
 		*xmlszp = -1;
 
+	if (xl == NULL || alloc_fn == NULL)
+		return NULL;
+
 	max_depth = -1;
 	TAILQ_FOREACH(xe, xl, entry) {
 		if (max_depth < xe->depth)
@@ -108,7 +111,10 @@ for_real:
 struct xmlsd_element *
 xmlsd_create(struct xmlsd_element_list *xl, const char *name)
 {
-	struct xmlsd_element *xe;
+	struct xmlsd_element *xe = NULL;
+
+	if (xl == NULL || name == NULL || (strlen(name) == 0))
+		goto fail;
 
         TAILQ_INIT(xl);
 
@@ -139,6 +145,10 @@ xmlsd_set_attr_int32(struct xmlsd_element *xe, const char *name, int32_t ival)
 {
 	char *buf;
 	int rv;
+
+	if (xe == NULL || name == NULL || (strlen(name) == 0))
+		return 1;
+
 	if (asprintf(&buf, "%d", ival) == -1)
 		return 1;
 	if (buf == NULL)
@@ -156,6 +166,10 @@ xmlsd_set_attr_uint32(struct xmlsd_element *xe, const char *name, uint32_t ival)
 {
 	char *buf;
 	int rv;
+
+	if (xe == NULL || name == NULL || (strlen(name) == 0))
+		return 1;
+
 	if (asprintf(&buf, "%u", ival) == -1)
 		return 1;
 	if (buf == NULL)
@@ -173,6 +187,10 @@ xmlsd_set_attr_int64(struct xmlsd_element *xe, const char *name, int64_t ival)
 {
 	char *buf;
 	int rv;
+
+	if (xe == NULL || name == NULL || (strlen(name) == 0))
+		return 1;
+
 	if (asprintf(&buf, "%" PRId64, ival) == -1)
 		return 1;
 	if (buf == NULL)
@@ -190,6 +208,10 @@ xmlsd_set_attr_uint64(struct xmlsd_element *xe, const char *name, uint64_t ival)
 {
 	char *buf;
 	int rv;
+
+	if (xe == NULL || name == NULL || (strlen(name) == 0))
+		return 1;
+
 	if (asprintf(&buf, "%" PRIu64, ival) == -1)
 		return 1;
 	if (buf == NULL)
@@ -207,6 +229,10 @@ xmlsd_set_attr_x32(struct xmlsd_element *xe, const char *name, uint32_t ival)
 {
 	char *buf;
 	int rv;
+
+	if (xe == NULL || name == NULL || (strlen(name) == 0))
+		return 1;
+
 	if (asprintf(&buf, "0x%x", ival) == -1)
 		return 1;
 	if (buf == NULL)
@@ -224,6 +250,10 @@ xmlsd_set_attr_x64(struct xmlsd_element *xe, const char *name, uint64_t ival)
 {
 	char *buf;
 	int rv;
+
+	if (xe == NULL || name == NULL || (strlen(name) == 0))
+		return 1;
+
 	if (asprintf(&buf, "0x%" PRIx64, ival) == -1)
 		return 1;
 	if (buf == NULL)
@@ -241,7 +271,7 @@ xmlsd_set_attr(struct xmlsd_element *xe, const char *name, const char *value)
 {
 	struct xmlsd_attribute *xa = NULL;
 
-	if (xe == NULL || name == NULL || value == NULL)
+	if (xe == NULL || name == NULL || (strlen(name) == 0) || value == NULL)
 		goto fail;
 		
         xa = calloc(1, sizeof *xe);
@@ -274,11 +304,16 @@ fail:
 int
 xmlsd_set_value(struct xmlsd_element *xe, const char *value)
 {
+	if (xe == NULL || value == NULL)
+		return 1;
+		
 	if (xe->value)
 		free(xe->value);
+
 	xe->value = strdup(value);
 	if (xe->value == NULL)
 		return 1;
+
 	return 0;
 }
 
@@ -286,14 +321,19 @@ struct xmlsd_element *
 xmlsd_add_element(struct xmlsd_element_list *xl, struct xmlsd_element *xe,
     const char *name)
 {
-	struct xmlsd_element *nxe, *prev, *next;
+	struct xmlsd_element *nxe = NULL, *prev, *next;
+
+	if (xl == NULL || xe == NULL || name == NULL || (strlen(name) == 0))
+		goto fail;
 
         nxe = calloc(1, sizeof *nxe);
         if (nxe == NULL)
 		goto fail;
+
 	nxe->name = strdup(name);
 	if (nxe->name == NULL)
 		goto fail;
+
         TAILQ_INIT(&nxe->attr_list);
 	nxe->depth = xe->depth+1;
 	nxe->parent = xe;
@@ -310,6 +350,7 @@ xmlsd_add_element(struct xmlsd_element_list *xl, struct xmlsd_element *xe,
 	TAILQ_INSERT_AFTER(xl, prev, nxe, entry);
 
 	return nxe;
+
 fail:
 	if (nxe) {
 		if (nxe->name)
@@ -352,8 +393,9 @@ xmlsd_remove_element(struct xmlsd_element_list *xl, struct xmlsd_element *xe)
 	struct xmlsd_element	*next;
 	int			 depth;
 
-	if (xe == NULL || TAILQ_EMPTY(xl))
+	if (xe == NULL || xl == NULL || TAILQ_EMPTY(xl))
 		return;
+
 	depth = xe->depth;
 	do {
 		next = TAILQ_NEXT(xe, entry);
