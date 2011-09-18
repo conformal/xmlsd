@@ -1,4 +1,3 @@
-# $xmlsd$
 
 # Attempt to include platform specific makefile.
 # OSNAME may be passed in.

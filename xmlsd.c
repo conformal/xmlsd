@@ -1,4 +1,3 @@
-/* $xmlsd$ */
 /*
  * Copyright (c) 2010 Marco Peereboom <marco@peereboom.us>
  *
@@ -26,7 +25,6 @@
 #include <poll.h>
 #include <expat.h>
 
-static const char *cvstag = "$xmlsd$";
 static const char *vertag = "version: " XMLSD_VERSION;
 
 #define XMLSD_PAGE_SIZE		(1024)
@@ -56,7 +54,6 @@ xmlsd_version(int *major, int *minor, int *patch)
 	*minor = XMLSD_VERSION_MINOR;
 	*patch = XMLSD_VERSION_PATCH;
 	/* Portable way to avoid unused variable compile warnings */
-	(void) (cvstag);
 	(void) (vertag);
 }
 

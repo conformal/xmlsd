@@ -1,4 +1,3 @@
-# $xmlsd$
 
 %define name		xmlsd
 %define version		0.5.0

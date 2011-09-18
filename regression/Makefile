@@ -1,4 +1,3 @@
-# $xmlsd$
 
 .include <bsd.own.mk>
 

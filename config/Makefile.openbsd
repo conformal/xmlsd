@@ -1,4 +1,3 @@
-# $xmlsd$
 
 .ifdef ROFF
 MANDIR= ${LOCALBASE}/man/cat

@@ -1,4 +1,3 @@
-# $xmlsd$
 
 PROG=generate
 #MAN=generate.8

@@ -1,4 +1,3 @@
-# $xmlsd$
 
 PROG=mem
 #MAN=mem.8

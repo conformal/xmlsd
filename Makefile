@@ -1,4 +1,3 @@
-# $xmlsd$
 
 SYSTEM != uname -s
 .if exists(${.CURDIR}/config/Makefile.$(SYSTEM:L))

@@ -1,4 +1,3 @@
-# $xmlsd$
 
 PROG=file
 #MAN=file.8

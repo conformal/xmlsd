@@ -1,4 +1,3 @@
-/* $xmlsd$ */
 /*
  * Copyright (c) 2011 Dale Rahn <drahn@dalerahn.com>
  *
