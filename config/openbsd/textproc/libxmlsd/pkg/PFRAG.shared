@@ -1,0 +1,2 @@
+@comment $OpenBSD$
+@lib lib/libxmlsd.so.${LIBxmlsd_VERSION}
