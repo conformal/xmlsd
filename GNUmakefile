@@ -11,6 +11,7 @@ LOCALBASE ?= /usr/local
 BINDIR ?= ${LOCALBASE}/bin
 LIBDIR ?= ${LOCALBASE}/lib
 INCDIR ?= ${LOCALBASE}/include
+MANDIR ?= $(LOCALBASE)/share/man
 
 # Use obj directory if it exists.
 OBJPREFIX ?= obj/
@@ -52,6 +53,7 @@ ifneq "$(LIB.OBJS)" "$(LIB.SOBJS)"
 	LIB.DEPS += $(addsuffix .depend, $(LIB.SOBJS))
 endif
 LIB.LDFLAGS = $(LDFLAGS.EXTRA) $(LDFLAGS) 
+LIB.MDIRS = $(foreach page, $(LIB.MANPAGES), $(subst ., man, $(suffix $(page))))
 
 all: $(OBJPREFIX)$(LIB.SHARED) $(OBJPREFIX)$(LIB.STATIC)
 
@@ -87,6 +89,11 @@ install:
 	$(INSTALL) -m 0644 $(OBJPREFIX)$(LIB.STATIC) $(DESTDIR)$(LIBDIR)/
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(INCDIR)/
 	$(INSTALL) -m 0644 $(LIB.HEADERS) $(DESTDIR)$(INCDIR)/
+	$(INSTALL) -m 0755 -d $(addprefix $(DESTDIR)$(MANDIR)/, $(LIB.MDIRS))
+	$(foreach page, $(LIB.MANPAGES), \
+		$(INSTALL) -m 0444 $(page) $(addprefix $(DESTDIR)$(MANDIR)/, \
+		$(subst ., man, $(suffix $(page))))/; \
+	)
 
 uninstall:
 	$(RM) $(DESTDIR)$(LIBDIR)/$(LIB.DEVLNK)
@@ -94,6 +101,10 @@ uninstall:
 	$(RM) $(DESTDIR)$(LIBDIR)/$(LIB.SHARED)
 	$(RM) $(DESTDIR)$(LIBDIR)/$(LIB.STATIC)
 	$(RM) $(addprefix $(DESTDIR)$(INCDIR)/, $(LIB.HEADERS))
+	$(foreach page, $(LIB.MANPAGES), \
+		$(RM) $(addprefix $(DESTDIR)$(MANDIR)/, \
+		$(subst ., man, $(suffix $(page))))/$(page); \
+	)
 
 clean:
 	$(RM) $(LIB.SOBJS)
