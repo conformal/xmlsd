@@ -46,14 +46,39 @@ LIB.NAME = xmlsd
 LIB.SRCS = xmlsd.c xmlsd_generate.c
 LIB.HEADERS = xmlsd.h
 LIB.MANPAGES = xmlsd.3
+LIB.MLINKS  =xmlsd.3 xmlsd_add_element.3
+LIB.MLINKS +=xmlsd.3 xmlsd_check_attributes.3
+LIB.MLINKS +=xmlsd.3 xmlsd_check_boolean.3
+LIB.MLINKS +=xmlsd.3 xmlsd_check_path.3
+LIB.MLINKS +=xmlsd.3 xmlsd_create.3
+LIB.MLINKS +=xmlsd.3 xmlsd_free_element.3
+LIB.MLINKS +=xmlsd.3 xmlsd_generate.3
+LIB.MLINKS +=xmlsd.3 xmlsd_get_attr.3
+LIB.MLINKS +=xmlsd.3 xmlsd_get_value.3
+LIB.MLINKS +=xmlsd.3 xmlsd_parse_file.3
+LIB.MLINKS +=xmlsd.3 xmlsd_parse_fileds.3
+LIB.MLINKS +=xmlsd.3 xmlsd_parse_mem.3
+LIB.MLINKS +=xmlsd.3 xmlsd_remove_element.3
+LIB.MLINKS +=xmlsd.3 xmlsd_set_attr.3
+LIB.MLINKS +=xmlsd.3 xmlsd_set_attr_int32.3
+LIB.MLINKS +=xmlsd.3 xmlsd_set_attr_int64.3
+LIB.MLINKS +=xmlsd.3 xmlsd_set_attr_uint32.3
+LIB.MLINKS +=xmlsd.3 xmlsd_set_attr_uint64.3
+LIB.MLINKS +=xmlsd.3 xmlsd_set_attr_x32.3
+LIB.MLINKS +=xmlsd.3 xmlsd_set_attr_x64.3
+LIB.MLINKS +=xmlsd.3 xmlsd_set_value.3
+LIB.MLINKS +=xmlsd.3 xmlsd_unwind.3
+LIB.MLINKS +=xmlsd.3 xmlsd_validate.3
+LIB.MLINKS +=xmlsd.3 xmlsd_version.3
 LIB.OBJS = $(addprefix $(OBJPREFIX), $(LIB.SRCS:.c=.o))
 LIB.SOBJS = $(addprefix $(OBJPREFIX), $(LIB.SRCS:.c=.$(SHARED_OBJ_EXT)))
 LIB.DEPS = $(addsuffix .depend, $(LIB.OBJS))
 ifneq "$(LIB.OBJS)" "$(LIB.SOBJS)"
 	LIB.DEPS += $(addsuffix .depend, $(LIB.SOBJS))
 endif
-LIB.LDFLAGS = $(LDFLAGS.EXTRA) $(LDFLAGS) 
 LIB.MDIRS = $(foreach page, $(LIB.MANPAGES), $(subst ., man, $(suffix $(page))))
+LIB.MLINKS := $(foreach page, $(LIB.MLINKS), $(subst ., man, $(suffix $(page)))/$(page))
+LIB.LDFLAGS = $(LDFLAGS.EXTRA) $(LDFLAGS)
 
 all: $(OBJPREFIX)$(LIB.SHARED) $(OBJPREFIX)$(LIB.STATIC)
 
@@ -94,6 +119,16 @@ install:
 		$(INSTALL) -m 0444 $(page) $(addprefix $(DESTDIR)$(MANDIR)/, \
 		$(subst ., man, $(suffix $(page))))/; \
 	)
+	@set $(addprefix $(DESTDIR)$(MANDIR)/, $(LIB.MLINKS)); \
+	while : ; do \
+		case $$# in \
+			0) break;; \
+			1) echo "Warning: Unbalanced MLINK: $$1"; break;; \
+		esac; \
+		page=$$1; shift; link=$$1; shift; \
+		echo $(LN) $(LNFORCE) $$page $$link; \
+		$(LN) $(LNFORCE) $$page $$link; \
+	done
 
 uninstall:
 	$(RM) $(DESTDIR)$(LIBDIR)/$(LIB.DEVLNK)
@@ -101,6 +136,16 @@ uninstall:
 	$(RM) $(DESTDIR)$(LIBDIR)/$(LIB.SHARED)
 	$(RM) $(DESTDIR)$(LIBDIR)/$(LIB.STATIC)
 	$(RM) $(addprefix $(DESTDIR)$(INCDIR)/, $(LIB.HEADERS))
+	@set $(addprefix $(DESTDIR)$(MANDIR)/, $(LIB.MLINKS)); \
+	while : ; do \
+		case $$# in \
+			0) break;; \
+			1) echo "Warning: Unbalanced MLINK: $$1"; break;; \
+		esac; \
+		page=$$1; shift; link=$$1; shift; \
+		echo $(RM) $$link; \
+		$(RM) $$link; \
+	done
 	$(foreach page, $(LIB.MANPAGES), \
 		$(RM) $(addprefix $(DESTDIR)$(MANDIR)/, \
 		$(subst ., man, $(suffix $(page))))/$(page); \
