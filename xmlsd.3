@@ -1,0 +1,77 @@
+.\"
+.\" Copyright (c) 2010 Marco Peereboom <marco@peereboom.us>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd $Mdocdate: June 18 2011 $
+.Dt XMLSD 3
+.Os
+.Sh NAME
+.Nm xmlsd
+.Nd xml validation library  
+.Sh SYNOPSIS
+.Fd #include <xmlsd.h>
+.Ft struct xmlsd_element *
+.Fn xmlsd_add_element "struct xmlsd_element_list *xel" "struct xmlsd_element *xe" "const char *"
+.Ft int
+.Fn xmlsd_check_attributes "struct xmlsd_element *xe" "struct xmlsd_v_attr *xva"
+.Ft int
+.Fn xmlsd_check_boolean "char *" "int *"
+.Ft int
+.Fn xmlsd_check_path "struct xmlsd_element *xe" "char *path"
+.Ft struct xmlsd_element *
+.Fn xmlsd_create "struct xmlsd_element_list *xel" "const char *field"
+.Ft void
+.Fn xmlsd_free_element "struct xmlsd_element *xe"
+.Ft char * 
+.Fn xmlsd_generate "struct xmlsd_element_list *xel" "void *(*alloc_fn)(size_t)" "size_t *sz" "int withhdr"
+.Ft char *
+.Fn xmlsd_get_attr "struct xmlsd_element *xe" "char *key"
+.Ft char *
+.Fn xmlsd_get_value "struct xmlsd_element_list *xel" "char *key" "struct xmlsd_element **xe"
+.Ft int
+.Fn xmlsd_parse_file "FILE *stream" "struct xmlsd_element_list *xel"
+.Ft int
+.Fn xmlsd_parse_fileds "int fd" "struct xmlsd_element_list *xel"
+.Ft int
+.Fn xmlsd_parse_mem "char *mem" "size_t sz" "struct xmlsd_element_list *xel"
+.Ft void
+.Fn xmlsd_remove_element "struct xmlsd_element_list *xel" "struct xmlsd_element *xe"
+.Ft int
+.Fn xmlsd_set_attr "struct xmlsd_element *xe" "const char *" "const char *"
+.Ft int 
+.Fn xmlsd_set_attr_int32 "struct xmlsd_element *xe" "const char *" "int32_t"
+.Ft int 
+.Fn xmlsd_set_attr_int64 "struct xmlsd_element *xe" "const char *" "int64_t"
+.Ft int
+.Fn xmlsd_set_attr_uint32 "struct xmlsd_element *xe" "const char *" "uint32_t"
+.Ft int
+.Fn xmlsd_set_attr_uint64 "struct xmlsd_element *xe" "const char *" "uint64_t"
+.Ft int
+.Fn xmlsd_set_attr_x32 "struct xmlsd_element *xe" "const char *" "uint32_t"
+.Ft int
+.Fn xmlsd_set_attr_x64 "struct xmlsd_element *xe" "const char *" "uint64_t"
+.Ft int
+.Fn xmlsd_set_value "struct xmlsd_element *xe" "const char *value"
+.Ft int
+.Fn xmlsd_unwind "struct xmlsd_element_list *xel"  
+.Ft int
+.Fn xmlsd_validate "struct xmlsd_element_list *xel" "struct xmlsd_v_elements *xve"
+.Ft void
+.Fn xmlsd_version "int *major" "int *minor" "int *patch"
+.Pp
+.Sh HISTORY
+.An -nosplit
+.Nm
+was written by
+.An Conformal Systems, LLC. Aq info@conformal.com .

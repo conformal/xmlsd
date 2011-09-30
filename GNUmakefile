@@ -44,6 +44,7 @@ SHARED_OBJ_EXT ?= o
 LIB.NAME = xmlsd
 LIB.SRCS = xmlsd.c xmlsd_generate.c
 LIB.HEADERS = xmlsd.h
+LIB.MANPAGES = xmlsd.3
 LIB.OBJS = $(addprefix $(OBJPREFIX), $(LIB.SRCS:.c=.o))
 LIB.SOBJS = $(addprefix $(OBJPREFIX), $(LIB.SRCS:.c=.$(SHARED_OBJ_EXT)))
 LIB.DEPS = $(addsuffix .depend, $(LIB.OBJS))
