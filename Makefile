@@ -38,7 +38,7 @@ MLINKS+=xmlsd.3 xmlsd_unwind.3
 MLINKS+=xmlsd.3 xmlsd_validate.3
 MLINKS+=xmlsd.3 xmlsd_version.3
 
-DEBUG+= -ggdb3 
+DEBUG+= -ggdb3
 CFLAGS+= -Wall -Werror
 CFLAGS+= -I${.CURDIR} -I${INCDIR}
 LDADD+=-lexpat

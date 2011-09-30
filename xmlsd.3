@@ -18,7 +18,7 @@
 .Os
 .Sh NAME
 .Nm xmlsd
-.Nd xml validation library  
+.Nd xml validation library
 .Sh SYNOPSIS
 .Fd #include <xmlsd.h>
 .Ft struct xmlsd_element *
@@ -33,7 +33,7 @@
 .Fn xmlsd_create "struct xmlsd_element_list *xel" "const char *field"
 .Ft void
 .Fn xmlsd_free_element "struct xmlsd_element *xe"
-.Ft char * 
+.Ft char *
 .Fn xmlsd_generate "struct xmlsd_element_list *xel" "void *(*alloc_fn)(size_t)" "size_t *sz" "int withhdr"
 .Ft char *
 .Fn xmlsd_get_attr "struct xmlsd_element *xe" "char *key"
@@ -49,9 +49,9 @@
 .Fn xmlsd_remove_element "struct xmlsd_element_list *xel" "struct xmlsd_element *xe"
 .Ft int
 .Fn xmlsd_set_attr "struct xmlsd_element *xe" "const char *" "const char *"
-.Ft int 
+.Ft int
 .Fn xmlsd_set_attr_int32 "struct xmlsd_element *xe" "const char *" "int32_t"
-.Ft int 
+.Ft int
 .Fn xmlsd_set_attr_int64 "struct xmlsd_element *xe" "const char *" "int64_t"
 .Ft int
 .Fn xmlsd_set_attr_uint32 "struct xmlsd_element *xe" "const char *" "uint32_t"
@@ -64,7 +64,7 @@
 .Ft int
 .Fn xmlsd_set_value "struct xmlsd_element *xe" "const char *value"
 .Ft int
-.Fn xmlsd_unwind "struct xmlsd_element_list *xel"  
+.Fn xmlsd_unwind "struct xmlsd_element_list *xel"
 .Ft int
 .Fn xmlsd_validate "struct xmlsd_element_list *xel" "struct xmlsd_v_elements *xve"
 .Ft void

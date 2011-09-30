@@ -68,10 +68,10 @@ for_real:
 			obuf += snprintf(obuf, buf ? bufsz - (obuf-buf) : 0,
 			    ">" NL);
 		} else {
-			if (xe->value != NULL) 
+			if (xe->value != NULL)
 				obuf += snprintf(obuf, buf ? bufsz - (obuf-buf)
 				    : 0, ">%s</%s>" NL, xe->value, xe->name);
-			else 
+			else
 				obuf += snprintf(obuf, buf ? bufsz - (obuf-buf)
 				    : 0, "/>" NL);
 		}
@@ -102,10 +102,10 @@ for_real:
 			goto for_real;
 		}
 	}
-	
+
 	return buf;
 }
-    
+
 
 struct xmlsd_element *
 xmlsd_create(struct xmlsd_element_list *xl, const char *name)
@@ -127,7 +127,7 @@ xmlsd_create(struct xmlsd_element_list *xl, const char *name)
 
 	TAILQ_INSERT_TAIL(xl, xe, entry);
 	/* depth is set to 0 as result of the calloc */
-	
+
 	return xe;
 fail:
 	if (xe) {
@@ -272,7 +272,7 @@ xmlsd_set_attr(struct xmlsd_element *xe, const char *name, const char *value)
 
 	if (xe == NULL || name == NULL || (strlen(name) == 0) || value == NULL)
 		goto fail;
-		
+
         xa = calloc(1, sizeof *xe);
 
         if (xa == NULL)
@@ -305,7 +305,7 @@ xmlsd_set_value(struct xmlsd_element *xe, const char *value)
 {
 	if (xe == NULL || value == NULL)
 		return 1;
-		
+
 	if (xe->value)
 		free(xe->value);
 
@@ -338,10 +338,10 @@ xmlsd_add_element(struct xmlsd_element_list *xl, struct xmlsd_element *xe,
 	nxe->parent = xe;
 
 	/* figure out where to insert node! */
-	
+
 	prev = xe;
 	while((next = TAILQ_NEXT(prev, entry))) {
-		if (next->depth <= xe->depth)	
+		if (next->depth <= xe->depth)
 			break;
 		prev = next;
 	}
