@@ -29,6 +29,7 @@ AR ?= ar
 CC ?= gcc
 INSTALL ?= install
 LN ?= ln
+LNFORCE ?= -f
 LNFLAGS ?= -sf
 MKDIR ?= mkdir
 RM ?= rm -f
