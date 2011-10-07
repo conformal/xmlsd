@@ -103,6 +103,8 @@ for_real:
 		}
 	}
 
+	free(depthname);
+
 	return buf;
 }
 
@@ -273,7 +275,7 @@ xmlsd_set_attr(struct xmlsd_element *xe, const char *name, const char *value)
 	if (xe == NULL || name == NULL || (strlen(name) == 0) || value == NULL)
 		goto fail;
 
-        xa = calloc(1, sizeof *xe);
+        xa = calloc(1, sizeof *xa);
 
         if (xa == NULL)
 		goto fail;
@@ -375,6 +377,7 @@ xmlsd_free_element(struct xmlsd_element *xe)
 			free(xa->name);
 		if (xa->value)
 			free(xa->value);
+		free(xa);
 	}
 
 	/* free element */

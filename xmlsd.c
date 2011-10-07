@@ -375,7 +375,8 @@ xmlsd_unwind(struct xmlsd_element_list *xl)
 		return (XMLSD_ERR_INTEGRITY);
 
 	while ((xe = TAILQ_FIRST(xl))) {
-		xmlsd_remove_element(xl, xe);
+		TAILQ_REMOVE(xl, xe, entry);
+		xmlsd_free_element(xe);
 	}
 
 	return (XMLSD_ERR_SUCCES);
