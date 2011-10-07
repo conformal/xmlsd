@@ -1,3 +1,11 @@
+xmlsd (0.5.1-1) unstable; urgency=medium
+
+  * Fix several memory leaks
+  * Add initial man page
+  * Other minor cleanup and bug fixes
+
+ -- Conformal Systems <package-discuss@conformal.com>  Fri, 07 Oct 2011 10:03:50 -0500
+
 xmlsd (0.5.0-1) unstable; urgency=low
 
   * Add set attribute functions for various types to XML generation API

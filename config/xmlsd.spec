@@ -1,6 +1,6 @@
 
 %define name		xmlsd
-%define version		0.5.0
+%define version		0.5.1
 %define release		1
 
 Name: 		%{name}
@@ -56,6 +56,10 @@ develop applications with xmlsd.
 /usr/lib/libxmlsd.a
 
 %changelog
+* Fri Oct 07 2011 - davec 0.5.1-1
+- Fix several memory leaks
+- Add initial man page
+- Other minor cleanup and bug fixes
 * Tue Aug 25 2011 - davec 0.5.0-1
 - Add set attribute functions for various types to XML generation API
 - Modify xmlsd_generate to take two additional parameters for size of
