@@ -51,6 +51,7 @@ develop applications with xmlsd.
 
 %files devel
 %defattr(-,root,root)
+%doc /usr/share/man/man?/*
 /usr/include/xmlsd.h
 /usr/lib/libxmlsd.so
 /usr/lib/libxmlsd.a
