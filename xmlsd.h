@@ -28,10 +28,14 @@
 #include <sys/queue.h>
 
 /* versioning */
+#define XMLSD_STRINGIFY(x)	#x
+#define XMLSD_STR(x)		XMLSD_STRINGIFY(x)
 #define XMLSD_VERSION_MAJOR	0
 #define XMLSD_VERSION_MINOR	5
 #define XMLSD_VERSION_PATCH	1
-#define XMLSD_VERSION		"0.5.1"
+#define XMLSD_VERSION		XMLSD_STR(XMLSD_VERSION_MAJOR) "." \
+				XMLSD_STR(XMLSD_VERSION_MINOR) "." \
+				XMLSD_STR(XMLSD_VERSION_PATCH)
 
 void	xmlsd_version(int *major, int *minor, int *patch);
 
