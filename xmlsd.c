@@ -383,11 +383,26 @@ xmlsd_unwind(struct xmlsd_element_list *xl)
 }
 
 int
+xmlsd_calc_path(struct xmlsd_element *xe, char *mypath, size_t mypathlen)
+{
+	struct xmlsd_element	*current;
+
+	mypath[0] = '\0';
+	for (current = xe; current != NULL; current = current->parent) {
+		if (xe != current)
+			strlcat(mypath, ".", mypathlen);
+		if (strlcat(mypath, current->name, mypathlen) >= mypathlen)
+			return 1;	/* Insufficient space. */
+	}
+
+	return 0;
+}
+
+int
 xmlsd_check_path(struct xmlsd_element *xe, char *path)
 {
 	int			rv = 1;
-	struct xmlsd_element	*current;
-	char			mypath[1024] = { '\0' };
+	char			mypath[1024];
 
 	if (xe == NULL || path == NULL)
 		goto done;
@@ -396,16 +411,8 @@ xmlsd_check_path(struct xmlsd_element *xe, char *path)
 	if (strlen(path) == 0 && xe->parent == NULL)
 		return (0);
 
-	current = xe;
-	while (current) {
-		if (xe != current)
-			strlcat(mypath, ".", sizeof mypath);
-		if (strlcat(mypath, current->name, sizeof mypath) >=
-		    sizeof mypath)
-			goto done;
-		current = current->parent;
-	}
-
+	if (xmlsd_calc_path(xe, mypath, sizeof mypath))
+		goto done;
 	if (strcmp(mypath, path))
 		goto done;
 
@@ -420,8 +427,11 @@ xmlsd_check_attributes(struct xmlsd_element *xe, struct xmlsd_v_attr *attrs)
 	struct xmlsd_attribute	*xa;
 	int			i, found, rv = 1;
 
-	if (!attrs)
+	if (!attrs) {
+		if (TAILQ_EMPTY(&xe->attr_list))
+			rv = 0;
 		goto done;
+	}
 
 	TAILQ_FOREACH(xa, &xe->attr_list, entry) {
 		found = 0;
@@ -435,9 +445,56 @@ xmlsd_check_attributes(struct xmlsd_element *xe, struct xmlsd_v_attr *attrs)
 			goto done;
 	}
 
+	/* Required attribute verification. */
+	for (i = 0; attrs[i].name != NULL; i++) {
+		if (!(attrs[i].flags & XMLSD_V_ATTR_F_REQUIRED))
+			continue;
+
+		found = 0;
+		TAILQ_FOREACH(xa, &xe->attr_list, entry) {
+			if (!strcmp(attrs[i].name, xa->name)) {
+				found = 1;
+				break;
+			}
+		}
+
+		if (found == 0)
+			goto done;
+	}
+
 	rv = 0;
 done:
 	return (rv);
+}
+
+int
+xmlsd_occurences(struct xmlsd_element_list *xl, struct xmlsd_element *parent,
+    const char *name)
+{
+	struct xmlsd_element	*xi;
+	int			 pdepth;
+	int			 occur;
+
+	/* Root node can only occur once by definition. */
+	if (parent == 0) {
+		xi = TAILQ_FIRST(xl);
+		if (xi == 0 || !strcmp(xi->name, name))
+			return 0;
+		return 1;
+	}
+
+	occur = 0;
+	pdepth = parent->depth;
+	for (xi = TAILQ_NEXT(parent, entry); xi != NULL && xi->depth > pdepth;
+	    xi = TAILQ_NEXT(xi, entry)) {
+		if (xi->parent != parent)
+			continue;
+
+		if (!strcmp(xi->name, name))
+			occur++;
+	}
+
+	return occur;
 }
 
 int
@@ -445,7 +502,10 @@ xmlsd_validate(struct xmlsd_element_list *xl, struct xmlsd_v_elements *els)
 {
 	struct xmlsd_element	*xe;
 	struct xmlsd_v_elem	*xc = NULL, *cmd;
-	int			i, rv = 1;
+	int			 i, rv = 1, occur;
+	char			*dot;
+	char			 xe_path[1024];
+
 
 	if (TAILQ_EMPTY(xl))
 		goto done;
@@ -465,32 +525,51 @@ xmlsd_validate(struct xmlsd_element_list *xl, struct xmlsd_v_elements *els)
 	if (xc == NULL)
 		goto done;
 
-	/* make sure we are the root element */
-	if (xmlsd_check_path(xe, xc->path))
-		goto done;
-
-	/* check root attributes */
-	if (!TAILQ_EMPTY(&xe->attr_list))
-		if (xmlsd_check_attributes(xe, xc->attr))
-			goto done;
-
 	TAILQ_FOREACH(xe, xl, entry) {
-		/* skip first */
-		if (xe == TAILQ_FIRST(xl))
-			continue;
-
 		/* find element */
-		for (cmd = NULL, i = 0; xc[i].element != NULL; i++)
-			if (!strcmp(xc[i].element, xe->name) &&
-			    !xmlsd_check_path(xe, xc[i].path))
-				cmd = &xc[i];
+		if (xe == TAILQ_FIRST(xl))
+			cmd = xc;
+		else {
+			for (cmd = NULL, i = 0; xc[i].element != NULL; i++)
+				if (!strcmp(xc[i].element, xe->name) &&
+				    !xmlsd_check_path(xe, xc[i].path))
+					cmd = &xc[i];
+		}
 		if (cmd == NULL)
 			goto done;
 
 		/* check attributes */
-		if (!TAILQ_EMPTY(&xe->attr_list))
-			if (xmlsd_check_attributes(xe, cmd->attr))
+		if (xmlsd_check_attributes(xe, cmd->attr))
+			goto done;
+
+		/*
+		 * Element occurence validation.
+		 */
+
+		if (xmlsd_calc_path(xe, xe_path, sizeof xe_path))
+			goto done;
+		for (i = 0; xc[i].element != NULL; i++) {
+			if (xc[i].path == NULL)
+				continue;	/* xc[i] is root. */
+			if (xc[i].min_occurs == 0 && xc[i].max_occurs == 0)
+				continue;	/* xc[i] occur irrelevant. */
+
+			dot = strchr(xc[i].path, '.');
+			if (dot == NULL)
+				continue;	/* xc[i] is no child. */
+			if (strcmp(xe_path, dot + 1))
+				continue;	/* xc[i] is stranger child. */
+
+			/*
+			 * xc[i] is a child of xe and has occurence
+			 * constraints.
+			 */
+			occur = xmlsd_occurences(xl, xe, xc[i].element);
+			if (occur < xc[i].min_occurs)
 				goto done;
+			if (xc[i].max_occurs != 0 && occur > xc[i].max_occurs)
+				goto done;
+		}
 	}
 
 	rv = 0;

@@ -52,12 +52,16 @@ void	xmlsd_version(int *major, int *minor, int *patch);
 /* validation structures */
 struct xmlsd_v_attr {
 	char			*name;
+	int			 flags;
+#define XMLSD_V_ATTR_F_REQUIRED	 0x0001
 };
 
 struct xmlsd_v_elem {
 	char			*element;
 	char			*path;
 	struct xmlsd_v_attr	*attr; /* array of attributes */
+	int			 min_occurs; /* Appear at least min times. */
+	int			 max_occurs; /* 0 for unbounded. */
 };
 
 struct xmlsd_v_elements {
