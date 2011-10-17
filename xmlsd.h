@@ -37,7 +37,8 @@
 				XMLSD_STR(XMLSD_VERSION_MINOR) "." \
 				XMLSD_STR(XMLSD_VERSION_PATCH)
 
-void	xmlsd_version(int *major, int *minor, int *patch);
+const char	*xmlsd_verstring(void);
+void		 xmlsd_version(int *major, int *minor, int *patch);
 
 #define XMLSD_ERR_UNKNOWN	(-1)
 #define XMLSD_ERR_SUCCES	(0)

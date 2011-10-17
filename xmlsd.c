@@ -25,7 +25,12 @@
 #include <poll.h>
 #include <expat.h>
 
+#ifdef BUILDSTR
+static const char *vertag = "version: " XMLSD_VERSION " " BUILDSTR;
+#else
 static const char *vertag = "version: " XMLSD_VERSION;
+#endif
+
 
 #define XMLSD_PAGE_SIZE		(1024)
 #define XML_MAX_PAGE_SIZE	(4 * XMLSD_PAGE_SIZE)
@@ -47,14 +52,18 @@ static int			xmlsd_error = XMLSD_ERR_UNKNOWN;
 					return;				\
 				} while (0)
 
+const char *
+xmlsd_verstring()
+{
+	return (vertag);
+}
+
 void
 xmlsd_version(int *major, int *minor, int *patch)
 {
 	*major = XMLSD_VERSION_MAJOR;
 	*minor = XMLSD_VERSION_MINOR;
 	*patch = XMLSD_VERSION_PATCH;
-	/* Portable way to avoid unused variable compile warnings */
-	(void) (vertag);
 }
 
 void

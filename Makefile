@@ -38,9 +38,15 @@ MLINKS+=xmlsd.3 xmlsd_unwind.3
 MLINKS+=xmlsd.3 xmlsd_validate.3
 MLINKS+=xmlsd.3 xmlsd_version.3
 
+BUILDVERSION != sh "${.CURDIR}/buildver.sh"
+
 DEBUG+= -ggdb3
 CFLAGS+= -Wall -Werror
 CFLAGS+= -I${.CURDIR} -I${INCDIR}
+.if !${BUILDVERSION} == ""
+CPPFLAGS+= -DBUILDSTR=\"$(BUILDVERSION)\"
+.endif
+
 LDADD+=-lexpat
 
 afterinstall:
