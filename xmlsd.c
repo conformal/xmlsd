@@ -477,7 +477,7 @@ done:
 }
 
 int
-xmlsd_occurences(struct xmlsd_element_list *xl, struct xmlsd_element *parent,
+xmlsd_occurrences(struct xmlsd_element_list *xl, struct xmlsd_element *parent,
     const char *name)
 {
 	struct xmlsd_element	*xi;
@@ -552,7 +552,7 @@ xmlsd_validate(struct xmlsd_element_list *xl, struct xmlsd_v_elements *els)
 			goto done;
 
 		/*
-		 * Element occurence validation.
+		 * Element occurrence validation.
 		 */
 
 		if (xmlsd_calc_path(xe, xe_path, sizeof xe_path))
@@ -570,10 +570,10 @@ xmlsd_validate(struct xmlsd_element_list *xl, struct xmlsd_v_elements *els)
 				continue;	/* xc[i] is stranger child. */
 
 			/*
-			 * xc[i] is a child of xe and has occurence
+			 * xc[i] is a child of xe and has occurrence
 			 * constraints.
 			 */
-			occur = xmlsd_occurences(xl, xe, xc[i].element);
+			occur = xmlsd_occurrences(xl, xe, xc[i].element);
 			if (occur < xc[i].min_occurs)
 				goto done;
 			if (xc[i].max_occurs != 0 && occur > xc[i].max_occurs)
