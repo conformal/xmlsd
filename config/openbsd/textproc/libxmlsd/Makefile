@@ -2,7 +2,7 @@
 
 COMMENT=	XML validation library
 
-DISTNAME=	xmlsd-0.5.1
+DISTNAME=	xmlsd-0.6.0
 PKGNAME=	lib${DISTNAME}
 CATEGORIES=    	textproc devel
 SHARED_LIBS=	xmlsd	2.1

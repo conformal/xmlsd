@@ -1,3 +1,12 @@
+xmlsd (0.6.0-1) unstable; urgency=low
+
+  * Implement required attribute and min/max occurrence functionality
+  * Man page corrections and updates
+  * Add build versioning
+  * Other minor cleanup
+
+ -- Conformal Systems <package-discuss@conformal.com>  Thu, 27 Oct 2011 19:32:50 -0500
+
 xmlsd (0.5.1-1) unstable; urgency=medium
 
   * Fix several memory leaks

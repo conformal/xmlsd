@@ -1,6 +1,6 @@
 
 %define name		xmlsd
-%define version		0.5.1
+%define version		0.6.0
 %define release		1
 
 Name: 		%{name}
@@ -57,6 +57,11 @@ develop applications with xmlsd.
 /usr/lib/libxmlsd.a
 
 %changelog
+* Thu Oct 27 2011 - davec 0.6.0-1
+- Implement required attribute and min/max occurrence functionality
+- Man page corrections and updates
+- Add build versioning
+- Other minor cleanup
 * Fri Oct 07 2011 - davec 0.5.1-1
 - Fix several memory leaks
 - Add initial man page
