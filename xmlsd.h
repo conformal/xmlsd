@@ -116,6 +116,12 @@ int xmlsd_set_attr_uint64(struct xmlsd_element *, const char *, uint64_t);
 int xmlsd_set_attr_x32(struct xmlsd_element *, const char *, uint32_t);
 int xmlsd_set_attr_x64(struct xmlsd_element *, const char *, uint64_t);
 int xmlsd_set_value(struct xmlsd_element *, const char *);
+int xmlsd_set_value_int32(struct xmlsd_element *, int32_t);
+int xmlsd_set_value_uint32(struct xmlsd_element *, uint32_t);
+int xmlsd_set_value_int64(struct xmlsd_element *, int64_t);
+int xmlsd_set_value_uint64(struct xmlsd_element *, uint64_t);
+int xmlsd_set_value_x32(struct xmlsd_element *, uint32_t);
+int xmlsd_set_value_x64(struct xmlsd_element *, uint64_t);
 struct xmlsd_element *xmlsd_add_element(struct xmlsd_element_list *,
     struct xmlsd_element *, const char *);
 void xmlsd_remove_element(struct xmlsd_element_list *, struct xmlsd_element *);

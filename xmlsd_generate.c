@@ -303,6 +303,132 @@ fail:
 }
 
 int
+xmlsd_set_value_int32(struct xmlsd_element *xe, int32_t ival)
+{
+	char *buf;
+	int rv;
+
+	if (xe == NULL)
+		return 1;
+
+	if (asprintf(&buf, "%d", ival) == -1)
+		return 1;
+	if (buf == NULL)
+		return 1;
+
+	rv = xmlsd_set_value(xe, buf);
+
+	free(buf);
+
+	return rv;
+}
+
+int
+xmlsd_set_value_uint32(struct xmlsd_element *xe, uint32_t ival)
+{
+	char *buf;
+	int rv;
+
+	if (xe == NULL)
+		return 1;
+
+	if (asprintf(&buf, "%u", ival) == -1)
+		return 1;
+	if (buf == NULL)
+		return 1;
+
+	rv = xmlsd_set_value(xe, buf);
+
+	free(buf);
+
+	return rv;
+}
+
+int
+xmlsd_set_value_int64(struct xmlsd_element *xe, int64_t ival)
+{
+	char *buf;
+	int rv;
+
+	if (xe == NULL)
+		return 1;
+
+	if (asprintf(&buf, "%" PRId64, ival) == -1)
+		return 1;
+	if (buf == NULL)
+		return 1;
+
+	rv = xmlsd_set_value(xe, buf);
+
+	free(buf);
+
+	return rv;
+}
+
+int
+xmlsd_set_value_uint64(struct xmlsd_element *xe, uint64_t ival)
+{
+	char *buf;
+	int rv;
+
+	if (xe == NULL)
+		return 1;
+
+	if (asprintf(&buf, "%" PRIu64, ival) == -1)
+		return 1;
+	if (buf == NULL)
+		return 1;
+
+	rv = xmlsd_set_value(xe, buf);
+
+	free(buf);
+
+	return rv;
+}
+
+int
+xmlsd_set_value_x32(struct xmlsd_element *xe, uint32_t ival)
+{
+	char *buf;
+	int rv;
+
+	if (xe == NULL)
+		return 1;
+
+	if (asprintf(&buf, "0x%x", ival) == -1)
+		return 1;
+	if (buf == NULL)
+		return 1;
+
+	rv = xmlsd_set_value(xe, buf);
+
+	free(buf);
+
+	return rv;
+}
+
+int
+xmlsd_set_value_x64(struct xmlsd_element *xe, uint64_t ival)
+{
+	char *buf;
+	int rv;
+
+	if (xe == NULL)
+		return 1;
+
+	if (asprintf(&buf, "0x%" PRIx64, ival) == -1)
+		return 1;
+	if (buf == NULL)
+		return 1;
+
+	rv = xmlsd_set_value(xe, buf);
+
+	free(buf);
+
+	return rv;
+}
+
+int
 xmlsd_set_value(struct xmlsd_element *xe, const char *value)
 {
 	if (xe == NULL || value == NULL)

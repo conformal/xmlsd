@@ -64,6 +64,18 @@
 .Ft int
 .Fn xmlsd_set_value "struct xmlsd_element *xe" "const char *value"
 .Ft int
+.Fn xmlsd_set_value_int32 "struct xmlsd_element *xe" "int32_t"
+.Ft int
+.Fn xmlsd_set_value_int64 "struct xmlsd_element *xe" "int64_t"
+.Ft int
+.Fn xmlsd_set_value_uint32 "struct xmlsd_element *xe" "uint32_t"
+.Ft int
+.Fn xmlsd_set_value_uint64 "struct xmlsd_element *xe" "uint64_t"
+.Ft int
+.Fn xmlsd_set_value_x32 "struct xmlsd_element *xe" "uint32_t"
+.Ft int
+.Fn xmlsd_set_value_x64 "struct xmlsd_element *xe" "uint64_t"
+.Ft int
 .Fn xmlsd_unwind "struct xmlsd_element_list *xel"
 .Ft int
 .Fn xmlsd_validate "struct xmlsd_element_list *xel" "struct xmlsd_v_elements *xve"
