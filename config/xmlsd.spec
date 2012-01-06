@@ -1,6 +1,6 @@
 
 %define name		xmlsd
-%define version		0.6.0
+%define version		0.7.0
 %define release		1
 
 Name: 		%{name}
@@ -57,6 +57,9 @@ develop applications with xmlsd.
 /usr/lib/libxmlsd.a
 
 %changelog
+* Fri Jan 06 2012 - davec 0.7.0-1
+- Add functions to set element values by type which mirror the functions
+  that set attributes
 * Thu Oct 27 2011 - davec 0.6.0-1
 - Implement required attribute and min/max occurrence functionality
 - Man page corrections and updates
