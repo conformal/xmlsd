@@ -263,7 +263,7 @@ xmlsd_parse_fileds(int f, struct xmlsd_element_list *xl)
 	XML_Parser		xml;
 	struct xmlsd_context	ctx;
 	int			irv, done, rv = XMLSD_ERR_UNKNOWN, status;
-	size_t			r;
+	ssize_t			r;
 	char			b[XMLSD_PAGE_SIZE];
 	struct pollfd		fds[1];
 
