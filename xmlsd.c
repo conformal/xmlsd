@@ -54,6 +54,7 @@ static int			xmlsd_error = XMLSD_ERR_UNKNOWN;
 
 int	xmlsd_calc_path(struct xmlsd_element *, char *, size_t);
 void	xmlsd_chardata(void *, const XML_Char *, int);
+void	xmlsd_end(void *, const char *);
 int	xmlsd_occurrences(struct xmlsd_element_list *,
 		struct xmlsd_element *, const char *);
 void	xmlsd_parse_done(struct xmlsd_context *);
