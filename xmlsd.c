@@ -41,16 +41,16 @@ struct xmlsd_context {
 	int				value_at;
 	int				tot_size;
 	int				depth;
+	int				saved_rv;
 
 	struct xmlsd_element_list	*xml_el;
 };
 
-static int			xmlsd_error = XMLSD_ERR_UNKNOWN;
-#define XMLSD_ABORT(_xml, _rv)	do {					\
-					xmlsd_error = _rv;		\
-					XML_StopParser(_xml, XML_FALSE);\
-					return;				\
-				} while (0)
+#define XMLSD_ABORT(_ctx, _rv)	do {			\
+	(_ctx)->saved_rv = _rv;				\
+	XML_StopParser((_ctx)->xml_parser, XML_FALSE);	\
+	return;						\
+} while (0)
 
 static int	xmlsd_calc_path(struct xmlsd_element *, char *, size_t);
 static void	xmlsd_chardata(void *, const XML_Char *, int);
@@ -102,7 +102,7 @@ xmlsd_chardata(void *data, const XML_Char *s, int len)
 
 		ctx->value = calloc(1, XMLSD_PAGE_SIZE);
 		if (ctx->value == NULL)
-			XMLSD_ABORT(xml, XMLSD_ERR_RESOURCE);
+			XMLSD_ABORT(ctx, XMLSD_ERR_RESOURCE);
 		ctx->tot_size += XMLSD_PAGE_SIZE;
 	}
 
@@ -113,7 +113,7 @@ xmlsd_chardata(void *data, const XML_Char *s, int len)
 			;
 
 		if (newlen > XML_MAX_PAGE_SIZE) {
-			XMLSD_ABORT(xml, XMLSD_ERR_OVERFLOW);
+			XMLSD_ABORT(ctx, XMLSD_ERR_OVERFLOW);
 			return;
 		}
 
@@ -123,7 +123,7 @@ xmlsd_chardata(void *data, const XML_Char *s, int len)
 			ctx->value = NULL;
 			ctx->value_at = 0;
 			ctx->tot_size = 0;
-			XMLSD_ABORT(xml, XMLSD_ERR_RESOURCE);
+			XMLSD_ABORT(ctx, XMLSD_ERR_RESOURCE);
 		}
 		ctx->value = newvalue;
 		ctx->tot_size = newlen;
@@ -150,25 +150,25 @@ xmlsd_start(void *data, const char *el, const char **attr)
 
 	xe = calloc(1, sizeof *xe);
 	if (xe == NULL)
-		XMLSD_ABORT(xml, XMLSD_ERR_RESOURCE);
+		XMLSD_ABORT(ctx, XMLSD_ERR_RESOURCE);
 
 	TAILQ_INSERT_TAIL(ctx->xml_el, xe, entry);
 	xe->name = strdup(el);
 	if (xe->name == NULL)
-		XMLSD_ABORT(xml, XMLSD_ERR_RESOURCE);
+		XMLSD_ABORT(ctx, XMLSD_ERR_RESOURCE);
 	TAILQ_INIT(&xe->attr_list);
 
 	for (i = 0; attr[i]; i += 2) {
 		/*fprintf(stderr, "%s -> %s = %s\n", el, attr[i], attr[i + 1]);*/
 		xa = calloc(1, sizeof *xa);
 		if (xa == NULL)
-			XMLSD_ABORT(xml, XMLSD_ERR_RESOURCE);
+			XMLSD_ABORT(ctx, XMLSD_ERR_RESOURCE);
 		xa->name = strdup(attr[i]);
 		if (xa->name == NULL)
-			XMLSD_ABORT(xml, XMLSD_ERR_RESOURCE);
+			XMLSD_ABORT(ctx, XMLSD_ERR_RESOURCE);
 		xa->value = strdup(attr[i + 1]);
 		if (xa->value == NULL)
-			XMLSD_ABORT(xml, XMLSD_ERR_RESOURCE);
+			XMLSD_ABORT(ctx, XMLSD_ERR_RESOURCE);
 		TAILQ_INSERT_TAIL(&xe->attr_list, xa, entry);
 	}
 
@@ -208,14 +208,14 @@ xmlsd_end(void *data, const char *el)
 		/* save off value */
 		xe = TAILQ_LAST(ctx->xml_el, xmlsd_element_list);
 		if (xe == NULL)
-			XMLSD_ABORT(xml, XMLSD_ERR_INTEGRITY);
+			XMLSD_ABORT(ctx, XMLSD_ERR_INTEGRITY);
 		if (strcmp(xe->name, el))
-			XMLSD_ABORT(xml, XMLSD_ERR_INTEGRITY);
+			XMLSD_ABORT(ctx, XMLSD_ERR_INTEGRITY);
 		if (xe->value)
-			XMLSD_ABORT(xml, XMLSD_ERR_INTEGRITY);
+			XMLSD_ABORT(ctx, XMLSD_ERR_INTEGRITY);
 		xe->value = strdup(ctx->value);
 		if (xe->value == NULL)
-			XMLSD_ABORT(xml, XMLSD_ERR_RESOURCE);
+			XMLSD_ABORT(ctx, XMLSD_ERR_RESOURCE);
 
 		free(ctx->value);
 		ctx->value = NULL;
@@ -236,6 +236,7 @@ xmlsd_parse_setup(struct xmlsd_context *ctx, struct xmlsd_element_list *xl)
 
 	bzero(ctx, sizeof *ctx);
 	ctx->depth = -1;
+	ctx->saved_rv = XMLSD_ERR_UNKNOWN;
 
 	xml = XML_ParserCreate(NULL);
 	if (xml == NULL)
@@ -303,7 +304,7 @@ xmlsd_parse_fileds(int f, struct xmlsd_element_list *xl)
 		if (XML_Parse(xml, b, r, done) != XML_STATUS_OK) {
 			status = XML_GetErrorCode(xml);
 			if (status == XML_ERROR_ABORTED)
-				rv = xmlsd_error;
+				rv = ctx.saved_rv;
 			else
 				rv = XMLSD_ERR_PARSER;
 			goto done;
@@ -342,7 +343,7 @@ xmlsd_parse_file(FILE *f, struct xmlsd_element_list *xl)
 		if (XML_Parse(xml, b, r, done) != XML_STATUS_OK) {
 			status = XML_GetErrorCode(xml);
 			if (status == XML_ERROR_ABORTED)
-				rv = xmlsd_error;
+				rv = ctx.saved_rv;
 			else
 				rv = XMLSD_ERR_PARSER;
 			goto done;
@@ -372,7 +373,7 @@ xmlsd_parse_mem(char *b, size_t sz, struct xmlsd_element_list *xl)
 	if (XML_Parse(xml, b, sz, 1) != XML_STATUS_OK) {
 		status = XML_GetErrorCode(xml);
 		if (status == XML_ERROR_ABORTED)
-			rv = xmlsd_error;
+			rv = ctx.saved_rv;
 		else
 			rv = XMLSD_ERR_PARSER;
 		goto done;
