@@ -26,9 +26,9 @@ xmlsd_generate(struct xmlsd_element_list *xl, void *(*alloc_fn)(size_t),
 {
         struct xmlsd_element	*xe, *xe_next;
         struct xmlsd_attribute 	*xa;
-	char			**depthname;
+	const char		**depthname;
 	char			*obuf, *buf;
-	int			bufsz;
+	size_t			bufsz;
 	int			max_depth, i;
 
 	obuf = NULL;
