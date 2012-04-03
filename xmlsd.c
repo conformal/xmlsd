@@ -52,14 +52,14 @@ static int			xmlsd_error = XMLSD_ERR_UNKNOWN;
 					return;				\
 				} while (0)
 
-int	xmlsd_calc_path(struct xmlsd_element *, char *, size_t);
-void	xmlsd_chardata(void *, const XML_Char *, int);
-void	xmlsd_end(void *, const char *);
-int	xmlsd_occurrences(struct xmlsd_element_list *,
-		struct xmlsd_element *, const char *);
-void	xmlsd_parse_done(struct xmlsd_context *);
-int	xmlsd_parse_setup(struct xmlsd_context *, struct xmlsd_element_list *);
-void	xmlsd_start(void *, const char *, const char **);
+static int	xmlsd_calc_path(struct xmlsd_element *, char *, size_t);
+static void	xmlsd_chardata(void *, const XML_Char *, int);
+static void	xmlsd_end(void *, const char *);
+static int	xmlsd_occurrences(struct xmlsd_element_list *,
+		    struct xmlsd_element *, const char *);
+static void	xmlsd_parse_done(struct xmlsd_context *);
+static int	xmlsd_parse_setup(struct xmlsd_context *, struct xmlsd_element_list *);
+static void	xmlsd_start(void *, const char *, const char **);
 
 const char *
 xmlsd_verstring()
@@ -75,7 +75,7 @@ xmlsd_version(int *major, int *minor, int *patch)
 	*patch = XMLSD_VERSION_PATCH;
 }
 
-void
+static void
 xmlsd_chardata(void *data, const XML_Char *s, int len)
 {
 	int			newlen;
@@ -135,7 +135,7 @@ xmlsd_chardata(void *data, const XML_Char *s, int len)
 	ctx->value[ctx->value_at] = '\0';
 }
 
-void
+static void
 xmlsd_start(void *data, const char *el, const char **attr)
 {
 	int			i;
@@ -185,7 +185,7 @@ xmlsd_start(void *data, const char *el, const char **attr)
 	}
 }
 
-void
+static void
 xmlsd_end(void *data, const char *el)
 {
 	XML_Parser		xml;
@@ -226,7 +226,7 @@ xmlsd_end(void *data, const char *el)
 	ctx->depth--;
 }
 
-int
+static int
 xmlsd_parse_setup(struct xmlsd_context *ctx, struct xmlsd_element_list *xl)
 {
 	XML_Parser		xml;
@@ -251,7 +251,7 @@ xmlsd_parse_setup(struct xmlsd_context *ctx, struct xmlsd_element_list *xl)
 	return (XMLSD_ERR_SUCCES);
 }
 
-void
+static void
 xmlsd_parse_done(struct xmlsd_context *ctx)
 {
 	XML_ParserFree(ctx->xml_parser);
@@ -400,7 +400,7 @@ xmlsd_unwind(struct xmlsd_element_list *xl)
 	return (XMLSD_ERR_SUCCES);
 }
 
-int
+static int
 xmlsd_calc_path(struct xmlsd_element *xe, char *mypath, size_t mypathlen)
 {
 	struct xmlsd_element	*current;
@@ -485,7 +485,7 @@ done:
 	return (rv);
 }
 
-int
+static int
 xmlsd_occurrences(struct xmlsd_element_list *xl, struct xmlsd_element *parent,
     const char *name)
 {
