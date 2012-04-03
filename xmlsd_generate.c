@@ -44,7 +44,7 @@ xmlsd_generate(struct xmlsd_element_list *xl, void *(*alloc_fn)(size_t),
 		if (max_depth < xe->depth)
 			max_depth = xe->depth;
 	}
-	depthname = calloc(max_depth+1, sizeof *depthname);
+	depthname = calloc(max_depth + 1, sizeof *depthname);
 	if (depthname == NULL)
 		return NULL;
 
@@ -462,7 +462,7 @@ xmlsd_add_element(struct xmlsd_element_list *xl, struct xmlsd_element *xe,
 		goto fail;
 
         TAILQ_INIT(&nxe->attr_list);
-	nxe->depth = xe->depth+1;
+	nxe->depth = xe->depth + 1;
 	nxe->parent = xe;
 
 	/* figure out where to insert node! */
