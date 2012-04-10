@@ -80,12 +80,10 @@ xmlsd_chardata(void *data, const XML_Char *s, int len)
 {
 	int			newlen;
 	XML_Char		*newvalue;
-	XML_Parser		xml;
 	struct	xmlsd_context	*ctx = data;
 
 	if (ctx == NULL)
 		errx(1, "xmlsd_chardata: no context");
-	xml = ctx->xml_parser;
 
 	/* make sure it isn't EOL */
 	if (iscntrl(s[0]) && len == 1)
@@ -139,14 +137,12 @@ static void
 xmlsd_start(void *data, const char *el, const char **attr)
 {
 	int			i;
-	XML_Parser		xml;
 	struct xmlsd_context	*ctx = data;
 	struct xmlsd_element	*xe, *x;
 	struct xmlsd_attribute	*xa;
 
 	if (ctx == NULL)
 		errx(1, "xmlsd_start: no context");
-	xml = ctx->xml_parser;
 
 	xe = calloc(1, sizeof *xe);
 	if (xe == NULL)
@@ -188,13 +184,11 @@ xmlsd_start(void *data, const char *el, const char **attr)
 static void
 xmlsd_end(void *data, const char *el)
 {
-	XML_Parser		xml;
 	struct xmlsd_context	*ctx = data;
 	struct xmlsd_element	*xe;
 
 	if (ctx == NULL)
 		errx(1, "xmlsd_end: no context");
-	xml = ctx->xml_parser;
 
 	if (ctx->value) {
 		if (ctx->value_at > 1) {
