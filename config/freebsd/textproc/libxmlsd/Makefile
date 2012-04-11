@@ -18,7 +18,7 @@ COMMENT=        Xmlsd is an xml validation library
 BUILD_DEPENDS=  ${LOCALBASE}/lib/libclens.a:${PORTSDIR}/devel/clens
 LIB_DEPENDS+=	expat.6:${PORTSDIR}/textproc/expat2
 
-LICENSE=        MIT
+LICENSE=        ISCL
 LICENSE_COMB=   single
 
 .include <bsd.port.mk>

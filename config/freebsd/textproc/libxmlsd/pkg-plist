@@ -1,6 +1,7 @@
 lib/libxmlsd.a
 lib/libxmlsd_p.a
 lib/libxmlsd.so.2
+lib/libxmlsd.so
 include/xmlsd.h
 man/man3/xmlsd.3.gz
 man/man3/xmlsd_add_element.3.gz
