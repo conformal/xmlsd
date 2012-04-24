@@ -1,6 +1,6 @@
 
 %define name		xmlsd
-%define version		0.7.0
+%define version		0.8.0
 %define release		1
 
 Name: 		%{name}
@@ -57,6 +57,12 @@ develop applications with xmlsd.
 /usr/lib/libxmlsd.a
 
 %changelog
+* Tue Apr 24 2012 - drahn 0.8.0-1
+- Kill unused xml references
+- Make thread safe
+- Add a threaded test
+- Add function prototypes
+- Other minor cleanup and bug fixes
 * Fri Jan 06 2012 - davec 0.7.0-1
 - Add functions to set element values by type which mirror the functions
   that set attributes

@@ -1,3 +1,13 @@
+xmlsd (0.8.0-1) unstable; urgency=low
+
+  * Kill unused xml references
+  * Make thread safe
+  * Add a threaded test
+  * Add function prototypes
+  * Other minor cleanup and bug fixes
+
+ -- Conformal Systems <package-discuss@conformal.com>  Tue, 24 Apr 2012 10:35:17 -0500
+
 xmlsd (0.7.0-1) unstable; urgency=low
 
   * Add functions to set element values by type which mirror the functions
