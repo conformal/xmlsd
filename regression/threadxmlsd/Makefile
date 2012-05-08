@@ -5,7 +5,7 @@ NOMAN=
 
 SRCS= threadxmlsd.c
 COPT+= -O2
-DEBUG+= -ggdb3 
+DEBUG+= -g
 CFLAGS+= -Wall
 CFLAGS+= -I../../
 LDFLAGS+= -lexpat -L../../ -lxmlsd
