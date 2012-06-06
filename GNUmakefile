@@ -13,7 +13,7 @@ LIBDIR ?= ${LOCALBASE}/lib
 INCDIR ?= ${LOCALBASE}/include
 MANDIR ?= $(LOCALBASE)/share/man
 
-BUILDVERSION=$(shell sh ${CURDIR}/../buildver.sh)
+BUILDVERSION=$(shell sh ${CURDIR}/buildver.sh)
 ifneq ("${BUILDVERSION}", "")
 CPPFLAGS+= -DBUILDSTR=\"$(BUILDVERSION)\"
 endif
