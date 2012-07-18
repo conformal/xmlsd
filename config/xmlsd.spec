@@ -1,6 +1,6 @@
 
 %define name		xmlsd
-%define version		0.8.0
+%define version		0.8.1
 %define release		1
 
 Name: 		%{name}
@@ -57,6 +57,9 @@ develop applications with xmlsd.
 /usr/lib/libxmlsd.a
 
 %changelog
+* Tue Jul 17 2012 - davec 0.8.1-1
+- Support clang builds
+- Fix non-release build versioning
 * Tue Apr 24 2012 - drahn 0.8.0-1
 - Kill unused xml references
 - Make thread safe
