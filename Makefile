@@ -10,7 +10,8 @@ INCDIR=${LOCALBASE}/include
 
 #WANTLINT=
 LIB= xmlsd
-SRCS= xmlsd.c xmlsd_generate.c
+SRCS=	xmlsd.c xmlsd_document.c xmlsd_element.c xmlsd_attribute.c
+SRCS+=	xmlsd_generate.c 
 HDRS= xmlsd.h
 MAN= xmlsd.3
 MLINKS+=xmlsd.3 xmlsd_add_element.3

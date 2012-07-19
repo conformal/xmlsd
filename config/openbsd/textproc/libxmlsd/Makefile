@@ -5,7 +5,7 @@ COMMENT=	XML validation library
 DISTNAME=	xmlsd-0.8.1
 PKGNAME=	lib${DISTNAME}
 CATEGORIES=    	textproc devel
-SHARED_LIBS=	xmlsd	2.2
+SHARED_LIBS=	xmlsd	3.0
 
 HOMEPAGE=	http://opensource.conformal.com/wiki/Xmlsd
 MASTER_SITES=	http://opensource.conformal.com/snapshots/xmlsd/

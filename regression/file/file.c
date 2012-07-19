@@ -19,28 +19,40 @@
 #include <err.h>
 #include <string.h>
 
+static void
+print_element(struct xmlsd_element *xe)
+{
+	struct xmlsd_element		*xc;
+	struct xmlsd_attribute		*xa;
+
+	fprintf(stderr, "%d %s = %s (parent = %s)\n",
+	    xmlsd_elem_get_depth(xe),
+	    xmlsd_elem_get_name(xe),
+	    xmlsd_elem_get_value(xe) ? xmlsd_elem_get_value(xe) : "NOVAL",
+	    xmlsd_elem_get_parent(xe) ?
+	        xmlsd_elem_get_name(xmlsd_elem_get_parent(xe)) :"NOPARENT");
+	XMLSD_ELEM_FOREACH_ATTR(xa, xe)
+		fprintf(stderr, "\t%s = %s\n", xmlsd_attr_get_name(xa),
+		    xmlsd_attr_get_value(xa));
+	XMLSD_ELEM_FOREACH_CHILDREN(xc, xe)
+		print_element(xc);
+}
 int
 main(int argc, char *argv[])
 {
-	struct xmlsd_element_list	xl;
+	struct xmlsd_document		*xd;
 	struct xmlsd_element		*xe;
-	struct xmlsd_attribute		*xa;
 
-	TAILQ_INIT(&xl);
+	if (xmlsd_doc_alloc(&xd) != XMLSD_ERR_SUCCES)
+		errx(1,"xmlsd_doc_alloc");
 
-	if (xmlsd_parse_file(stdin, &xl) != XMLSD_ERR_SUCCES)
+	if (xmlsd_parse_file(stdin, xd) != XMLSD_ERR_SUCCES)
 		errx(1, "xmlsd_parse");
-	TAILQ_FOREACH(xe, &xl, entry) {
-		fprintf(stderr, "%d %s = %s (parent = %s)\n",
-		    xe->depth,
-		    xe->name,
-		    xe->value ? xe->value : "NOVAL",
-		    xe->parent ? xe->parent->name : "NOPARENT");
-		TAILQ_FOREACH(xa, &xe->attr_list, entry)
-			fprintf(stderr, "\t%s = %s\n", xa->name, xa->value);
+	XMLSD_DOC_FOREACH_ELEM(xe, xd) {
+		print_element(xe);
 	}
 
-	xmlsd_unwind(&xl);
+	xmlsd_doc_free(xd);
 
 	return (0);
 }

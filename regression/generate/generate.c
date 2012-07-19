@@ -28,22 +28,24 @@
 int
 main(int argc, char *argv[])
 {
-	struct xmlsd_element_list	xl;
+	struct xmlsd_document		*xd;
 	struct xmlsd_element		*xe, *top_xe, *xe1;
 	char				*str;
 	FILE				*fp;
+	size_t				 sz;
 
-	TAILQ_INIT(&xl);
+	if (xmlsd_doc_alloc(&xd) != XMLSD_ERR_SUCCES)
+		errx(1,"xmlsd_doc_alloc");
 
 	fp = fopen("example.xml", "r");
 	if (fp == NULL)
 		errx(1, "unable to open input file");
 
-	if (xmlsd_parse_file(fp, &xl) != XMLSD_ERR_SUCCES)
+	if (xmlsd_parse_file(fp, xd) != XMLSD_ERR_SUCCES)
 		errx(1, "xmlsd_parse");
 	fclose(fp);
 
-	str = xmlsd_generate(&xl, malloc);
+	str = xmlsd_generate(xd, malloc, &sz, XMLSD_GEN_ADD_HEADER);
 
 	if (str)
 		printf("%s", str);
@@ -56,46 +58,44 @@ main(int argc, char *argv[])
 	fclose(fp);
 	free (str);
 
-	xmlsd_unwind(&xl);
+	xmlsd_doc_clear(xd);
 
-	TAILQ_INIT(&xl);
+	top_xe = xmlsd_doc_add_elem(xd, NULL, "level0");
+	xmlsd_elem_set_attr(top_xe, "version", "1");
 
-	top_xe = xmlsd_create(&xl, "level0");
-	xmlsd_set_attr(top_xe, "version", "1");
+	xe = xmlsd_doc_add_elem(xd, top_xe, "level1a");
+	xmlsd_elem_set_attr(xe, "l1a_attr", "l1a");
+	xe = xmlsd_doc_add_elem(xd, top_xe, "level1b");
+	xmlsd_elem_set_attr(xe, "l1b_attr", "l1b");
+	xe = xmlsd_doc_add_elem(xd, top_xe, "level1c");
+	xmlsd_elem_set_attr(xe, "l1c_attr", "l1c");
+	xmlsd_elem_set_value(xe, "something");
+	xe1 = xmlsd_doc_add_elem(xd, top_xe, "level1d");
+	xmlsd_elem_set_attr(xe1, "l1d_attr", "l1d");
+	xe = xmlsd_doc_add_elem(xd, xe1, "level2");
+	xmlsd_elem_set_attr(xe, "name", "a");
+	xmlsd_elem_set_attr(xe, "l2a_attr0", "0");
+	xmlsd_elem_set_attr(xe, "l2a_attrf", "1");
+	xe = xmlsd_doc_add_elem(xd, xe1, "level2");
+	xmlsd_elem_set_attr(xe, "name", "b");
+	xmlsd_elem_set_attr(xe, "l2b_attr0", "0");
+	xe = xmlsd_doc_add_elem(xd, xe, "level3");
+	xe = xmlsd_doc_add_elem(xd, xe, "level4");
+	xe = xmlsd_doc_add_elem(xd, xe, "level5");
+	xe = xmlsd_doc_add_elem(xd, xe, "level6");
+	xe = xmlsd_doc_add_elem(xd, xe, "level7");
+	xe = xmlsd_doc_add_elem(xd, xe, "level8");
+	xe = xmlsd_doc_add_elem(xd, xe, "level9");
+	xe = xmlsd_doc_add_elem(xd, xe, "level10");
+	xe = xmlsd_doc_add_elem(xd, xe, "level11");
+	xmlsd_elem_set_value(xe, "foo");
+	xe = xmlsd_doc_add_elem(xd, xe1, "level2");
+	xmlsd_elem_set_attr(xe, "name", "c");
+	xmlsd_elem_set_attr(xe, "l2c_attr0", "0");
+	xe = xmlsd_doc_add_elem(xd, xe, "level3b");
+	xmlsd_elem_set_attr(xe, "name", "l3b");
 
-	xe = xmld_add_element(&xl, top_xe, "level1a");
-	xmlsd_set_attr(xe, "l1a_attr", "l1a");
-	xe = xmld_add_element(&xl, top_xe, "level1b");
-	xmlsd_set_attr(xe, "l1b_attr", "l1b");
-	xe = xmld_add_element(&xl, top_xe, "level1c");
-	xmlsd_set_attr(xe, "l1c_attr", "l1c");
-	xmlsd_set_value(xe, "something");
-	xe1 = xmld_add_element(&xl, top_xe, "level1d");
-	xmlsd_set_attr(xe1, "l1d_attr", "l1d");
-	xe = xmld_add_element(&xl, xe1, "level2");
-	xmlsd_set_attr(xe, "name", "a");
-	xmlsd_set_attr(xe, "l2a_attr0", "0");
-	xmlsd_set_attr(xe, "l2a_attrf", "1");
-	xe = xmld_add_element(&xl, xe1, "level2");
-	xmlsd_set_attr(xe, "name", "b");
-	xmlsd_set_attr(xe, "l2b_attr0", "0");
-	xe = xmld_add_element(&xl, xe, "level3");
-	xe = xmld_add_element(&xl, xe, "level4");
-	xe = xmld_add_element(&xl, xe, "level5");
-	xe = xmld_add_element(&xl, xe, "level6");
-	xe = xmld_add_element(&xl, xe, "level7");
-	xe = xmld_add_element(&xl, xe, "level8");
-	xe = xmld_add_element(&xl, xe, "level9");
-	xe = xmld_add_element(&xl, xe, "level10");
-	xe = xmld_add_element(&xl, xe, "level11");
-	xmlsd_set_value(xe, "foo");
-	xe = xmld_add_element(&xl, xe1, "level2");
-	xmlsd_set_attr(xe, "name", "c");
-	xmlsd_set_attr(xe, "l2c_attr0", "0");
-	xe = xmld_add_element(&xl, xe, "level3b");
-	xmlsd_set_attr(xe, "name", "l3b");
-
-	str = xmlsd_generate(&xl, malloc);
+	str = xmlsd_generate(xd, malloc, &sz, XMLSD_GEN_ADD_HEADER);
 	if (str)
 		printf("%s", str);
 	else
@@ -106,6 +106,7 @@ main(int argc, char *argv[])
 	fwrite(str, strlen(str), sizeof *str, fp);
 	fclose(fp);
 	free (str);
+	xmlsd_doc_free(xd);
 
 	return (0);
 }

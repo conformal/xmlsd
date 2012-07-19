@@ -33,17 +33,36 @@ int				completed;
 int				created;
 pthread_mutex_t			mtx;
 
+static void
+print_element(struct xmlsd_element *xe)
+{
+	struct xmlsd_element		*xc;
+	struct xmlsd_attribute		*xa;
+
+	fprintf(stderr, "%d %s = %s (parent = %s)\n",
+	    xmlsd_elem_get_depth(xe),
+	    xmlsd_elem_get_name(xe),
+	    xmlsd_elem_get_value(xe) ? xmlsd_elem_get_value(xe) : "NOVAL",
+	    xmlsd_elem_get_parent(xe) ?
+	        xmlsd_elem_get_name(xmlsd_elem_get_parent(xe)) :"NOPARENT");
+	XMLSD_ELEM_FOREACH_ATTR(xa, xe)
+		fprintf(stderr, "\t%s = %s\n", xmlsd_attr_get_name(xa),
+		    xmlsd_attr_get_value(xa));
+	XMLSD_ELEM_FOREACH_CHILDREN(xc, xe)
+		print_element(xc);
+}
+
 void *
 thread_it(void *p)
 {
-	struct xmlsd_element_list	xl;
+	struct xmlsd_document		*xd;
 	struct xmlsd_element		*xe;
-	struct xmlsd_attribute		*xa;
 	int				f;
 	char				*b, *filename = (char *)p;
 	struct stat			sb;
 
-	TAILQ_INIT(&xl);
+	if (xmlsd_doc_alloc(&xd) != XMLSD_ERR_SUCCES)
+		errx(1,"xmlsd_doc_alloc");
 
 	f = open(filename, O_RDONLY, 0);
 	if (f == -1)
@@ -59,21 +78,15 @@ thread_it(void *p)
 	if (read(f, b, sb.st_size) != sb.st_size)
 		err(1, "read");
 
-	if (xmlsd_parse_mem(b, sb.st_size, &xl) != XMLSD_ERR_SUCCES)
+	if (xmlsd_parse_mem(b, sb.st_size, xd) != XMLSD_ERR_SUCCES)
 		errx(1, "xmlsd_parse");
-	if (verbose)
-		TAILQ_FOREACH(xe, &xl, entry) {
-			fprintf(stderr, "%d %s = %s (parent = %s)\n",
-			    xe->depth,
-			    xe->name,
-			    xe->value ? xe->value : "NOVAL",
-			    xe->parent ? xe->parent->name : "NOPARENT");
-			TAILQ_FOREACH(xa, &xe->attr_list, entry)
-				fprintf(stderr, "\t%s = %s\n",
-				    xa->name, xa->value);
+	if (verbose) {
+		XMLSD_DOC_FOREACH_ELEM(xe, xd) {
+			print_element(xe);
+		}
 	}
 
-	xmlsd_unwind(&xl);
+	xmlsd_doc_free(xd);
 
 	free(b);
 	close(f);

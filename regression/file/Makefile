@@ -4,7 +4,7 @@ PROG=file
 NOMAN=
 
 SRCS= file.c
-COPT+= -O2
+#COPT+= -O2
 DEBUG+= -g
 CFLAGS+= -Wall
 CFLAGS+= -I../../

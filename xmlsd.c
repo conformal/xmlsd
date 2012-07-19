@@ -15,6 +15,7 @@
  */
 
 #include "xmlsd.h"
+#include "xmlsd_internal.h"
 
 #include <unistd.h>
 #include <ctype.h>
@@ -43,7 +44,8 @@ struct xmlsd_context {
 	int				depth;
 	int				saved_rv;
 
-	struct xmlsd_element_list	*xml_el;
+	struct xmlsd_document		*xml_el;
+	struct xmlsd_element		*xml_last;
 };
 
 #define XMLSD_ABORT(_ctx, _rv)	do {			\
@@ -55,10 +57,11 @@ struct xmlsd_context {
 static int	xmlsd_calc_path(struct xmlsd_element *, char *, size_t);
 static void	xmlsd_chardata(void *, const XML_Char *, int);
 static void	xmlsd_end(void *, const char *);
-static int	xmlsd_occurrences(struct xmlsd_element_list *,
+static int	xmlsd_occurrences(struct xmlsd_document *,
 		    struct xmlsd_element *, const char *);
 static void	xmlsd_parse_done(struct xmlsd_context *);
-static int	xmlsd_parse_setup(struct xmlsd_context *, struct xmlsd_element_list *);
+static int	xmlsd_parse_setup(struct xmlsd_context *,
+		    struct xmlsd_document *);
 static void	xmlsd_start(void *, const char *, const char **);
 
 const char *
@@ -138,7 +141,7 @@ xmlsd_start(void *data, const char *el, const char **attr)
 {
 	int			i;
 	struct xmlsd_context	*ctx = data;
-	struct xmlsd_element	*xe, *x;
+	struct xmlsd_element	*xe;
 	struct xmlsd_attribute	*xa;
 
 	if (ctx == NULL)
@@ -148,10 +151,17 @@ xmlsd_start(void *data, const char *el, const char **attr)
 	if (xe == NULL)
 		XMLSD_ABORT(ctx, XMLSD_ERR_RESOURCE);
 
-	TAILQ_INSERT_TAIL(ctx->xml_el, xe, entry);
+	if (ctx->xml_last != NULL) {
+		TAILQ_INSERT_TAIL(&ctx->xml_last->children, xe, entry);
+	} else { /* top level */
+		TAILQ_INSERT_TAIL(&ctx->xml_el->children, xe, entry);
+	}
 	xe->name = strdup(el);
 	if (xe->name == NULL)
 		XMLSD_ABORT(ctx, XMLSD_ERR_RESOURCE);
+	TAILQ_INIT(&xe->children);
+	xe->parent = ctx->xml_last;
+	ctx->xml_last = xe;
 	TAILQ_INIT(&xe->attr_list);
 
 	for (i = 0; attr[i]; i += 2) {
@@ -170,15 +180,6 @@ xmlsd_start(void *data, const char *el, const char **attr)
 
 	ctx->depth++;
 	xe->depth = ctx->depth;
-
-	/* find parent */
-	xe->parent = NULL;
-	TAILQ_FOREACH_REVERSE(x, ctx->xml_el, xmlsd_element_list, entry) {
-		if (x->depth < xe->depth) {
-			xe->parent = x;
-			break;
-		}
-	}
 }
 
 static void
@@ -190,6 +191,11 @@ xmlsd_end(void *data, const char *el)
 	if (ctx == NULL)
 		errx(1, "xmlsd_end: no context");
 
+	xe = ctx->xml_last;
+	if (xe == NULL)
+		XMLSD_ABORT(ctx, XMLSD_ERR_INTEGRITY);
+	if (strcmp(xe->name, el))
+		XMLSD_ABORT(ctx, XMLSD_ERR_INTEGRITY);
 	if (ctx->value) {
 		if (ctx->value_at > 1) {
 			/* eat all blanks in back because expat isn't smart */
@@ -200,11 +206,6 @@ xmlsd_end(void *data, const char *el)
 			}
 		}
 		/* save off value */
-		xe = TAILQ_LAST(ctx->xml_el, xmlsd_element_list);
-		if (xe == NULL)
-			XMLSD_ABORT(ctx, XMLSD_ERR_INTEGRITY);
-		if (strcmp(xe->name, el))
-			XMLSD_ABORT(ctx, XMLSD_ERR_INTEGRITY);
 		if (xe->value)
 			XMLSD_ABORT(ctx, XMLSD_ERR_INTEGRITY);
 		xe->value = strdup(ctx->value);
@@ -217,15 +218,17 @@ xmlsd_end(void *data, const char *el)
 		ctx->tot_size = 0;
 	}
 
+	/* go up a level */
 	ctx->depth--;
+	ctx->xml_last = xe->parent;
 }
 
 static int
-xmlsd_parse_setup(struct xmlsd_context *ctx, struct xmlsd_element_list *xl)
+xmlsd_parse_setup(struct xmlsd_context *ctx, struct xmlsd_document *xd)
 {
 	XML_Parser		xml;
 
-	if (ctx == NULL || (xl && !TAILQ_EMPTY(xl)))
+	if (ctx == NULL || (xd && !xmlsd_doc_is_empty(xd)))
 		return (XMLSD_ERR_INTEGRITY);
 
 	bzero(ctx, sizeof *ctx);
@@ -237,7 +240,8 @@ xmlsd_parse_setup(struct xmlsd_context *ctx, struct xmlsd_element_list *xl)
 		return (XMLSD_ERR_RESOURCE);
 
 	ctx->xml_parser = xml;
-	ctx->xml_el = xl;
+	ctx->xml_el = xd;
+	ctx->xml_last = NULL;
 
 	XML_SetUserData(xml, ctx);
 	XML_SetElementHandler(xml, xmlsd_start, xmlsd_end);
@@ -253,7 +257,7 @@ xmlsd_parse_done(struct xmlsd_context *ctx)
 }
 
 int
-xmlsd_parse_fileds(int f, struct xmlsd_element_list *xl)
+xmlsd_parse_fileds(int f, struct xmlsd_document *xd)
 {
 	XML_Parser		xml;
 	struct xmlsd_context	ctx;
@@ -264,10 +268,10 @@ xmlsd_parse_fileds(int f, struct xmlsd_element_list *xl)
 
 	errx(1, "xmlsd_parse_fileds: UNTESTED");
 
-	if (f <= 0 || xl == NULL)
+	if (f <= 0 || xd == NULL)
 		return (XMLSD_ERR_INTEGRITY);
 
-	if ((irv = xmlsd_parse_setup(&ctx, xl)) != XMLSD_ERR_SUCCES)
+	if ((irv = xmlsd_parse_setup(&ctx, xd)) != XMLSD_ERR_SUCCES)
 		return (irv);
 
 	xml = ctx.xml_parser;
@@ -312,7 +316,7 @@ done:
 }
 
 int
-xmlsd_parse_file(FILE *f, struct xmlsd_element_list *xl)
+xmlsd_parse_file(FILE *f, struct xmlsd_document *xd)
 {
 	XML_Parser		xml;
 	struct xmlsd_context	ctx;
@@ -320,10 +324,10 @@ xmlsd_parse_file(FILE *f, struct xmlsd_element_list *xl)
 	size_t			r;
 	char			b[XMLSD_PAGE_SIZE];
 
-	if (f == NULL || xl == NULL)
+	if (f == NULL || xd == NULL)
 		return (XMLSD_ERR_INTEGRITY);
 
-	if ((irv = xmlsd_parse_setup(&ctx, xl)) != XMLSD_ERR_SUCCES)
+	if ((irv = xmlsd_parse_setup(&ctx, xd)) != XMLSD_ERR_SUCCES)
 		return (irv);
 
 	xml = ctx.xml_parser;
@@ -351,16 +355,16 @@ done:
 }
 
 int
-xmlsd_parse_mem(char *b, size_t sz, struct xmlsd_element_list *xl)
+xmlsd_parse_mem(const char *b, size_t sz, struct xmlsd_document *xd)
 {
 	int			irv, status, rv = XMLSD_ERR_UNKNOWN;
 	struct xmlsd_context	ctx;
 	XML_Parser		xml;
 
-	if (b == NULL || sz <= 0 || xl == NULL)
+	if (b == NULL || sz <= 0 || xd == NULL)
 		return (XMLSD_ERR_INTEGRITY);
 
-	if ((irv = xmlsd_parse_setup(&ctx, xl)) != XMLSD_ERR_SUCCES)
+	if ((irv = xmlsd_parse_setup(&ctx, xd)) != XMLSD_ERR_SUCCES)
 		return (irv);
 
 	xml = ctx.xml_parser;
@@ -377,22 +381,6 @@ xmlsd_parse_mem(char *b, size_t sz, struct xmlsd_element_list *xl)
 done:
 	xmlsd_parse_done(&ctx);
 	return (rv);
-}
-
-int
-xmlsd_unwind(struct xmlsd_element_list *xl)
-{
-	struct xmlsd_element *xe;
-
-	if (xl == NULL)
-		return (XMLSD_ERR_INTEGRITY);
-
-	while ((xe = TAILQ_FIRST(xl))) {
-		TAILQ_REMOVE(xl, xe, entry);
-		xmlsd_free_element(xe);
-	}
-
-	return (XMLSD_ERR_SUCCES);
 }
 
 static int
@@ -441,18 +429,20 @@ xmlsd_check_attributes(struct xmlsd_element *xe, struct xmlsd_v_attr *attrs)
 	int			i, found, rv = 1;
 
 	if (!attrs) {
-		if (TAILQ_EMPTY(&xe->attr_list))
+		if (TAILQ_EMPTY(&xe->attr_list)) {
 			rv = 0;
+		}
 		goto done;
 	}
 
 	TAILQ_FOREACH(xa, &xe->attr_list, entry) {
 		found = 0;
-		for (i = 0; attrs[i].name != NULL; i++)
+		for (i = 0; attrs[i].name != NULL; i++) {
 			if (!strcmp(attrs[i].name, xa->name)) {
 				found = 1;
 				break;
 			}
+		}
 
 		if (found == 0)
 			goto done;
@@ -481,28 +471,22 @@ done:
 }
 
 static int
-xmlsd_occurrences(struct xmlsd_element_list *xl, struct xmlsd_element *parent,
+xmlsd_occurrences(struct xmlsd_document *xl, struct xmlsd_element *parent,
     const char *name)
 {
 	struct xmlsd_element	*xi;
-	int			 pdepth;
 	int			 occur;
 
 	/* Root node can only occur once by definition. */
-	if (parent == 0) {
-		xi = TAILQ_FIRST(xl);
-		if (xi == 0 || !strcmp(xi->name, name))
+	if (parent == NULL) {
+		xi = xmlsd_doc_get_first_elem(xl);
+		if (xi == NULL || !strcmp(xi->name, name))
 			return 0;
 		return 1;
 	}
 
 	occur = 0;
-	pdepth = parent->depth;
-	for (xi = TAILQ_NEXT(parent, entry); xi != NULL && xi->depth > pdepth;
-	    xi = TAILQ_NEXT(xi, entry)) {
-		if (xi->parent != parent)
-			continue;
-
+	XMLSD_ELEM_FOREACH_CHILDREN(xi, parent) {
 		if (!strcmp(xi->name, name))
 			occur++;
 	}
@@ -510,22 +494,88 @@ xmlsd_occurrences(struct xmlsd_element_list *xl, struct xmlsd_element *parent,
 	return occur;
 }
 
+/*
+ * Validate an element and its children.
+ *
+ * `cmd' is the actual validation element that applies to this element.
+ * `xc' is the list of elements for the whole document.
+ */
+static int
+xmlsd_validate_element(struct xmlsd_document *xd, struct xmlsd_element *xe,
+    struct xmlsd_v_elem *cmd, struct xmlsd_v_elem *xc)
+{
+	struct xmlsd_element	*xi;
+	char			*dot;
+	char			 xe_path[1024];
+	int			 i, rv = 1, occur;
+
+	/* check attributes */
+	if (xmlsd_check_attributes(xe, cmd->attr)) {
+		goto done;
+	}
+
+	/*
+	 * Element occurrence validation.
+	 */
+
+	if (xmlsd_calc_path(xe, xe_path, sizeof xe_path)) {
+		goto done;
+	}
+	for (i = 0; xc[i].element != NULL; i++) {
+		if (xc[i].path == NULL)
+			continue;	/* xc[i] is root. */
+		if (xc[i].min_occurs == 0 && xc[i].max_occurs == 0)
+			continue;	/* xc[i] occur irrelevant. */
+
+		dot = strchr(xc[i].path, '.');
+		if (dot == NULL)
+			continue;	/* xc[i] is no child. */
+		if (strcmp(xe_path, dot + 1))
+			continue;	/* xc[i] is stranger child. */
+
+		/*
+		 * xc[i] is a child of xe and has occurrence
+		 * constraints.
+		 */
+		occur = xmlsd_occurrences(xd, xe, xc[i].element);
+		if (occur < xc[i].min_occurs)
+			goto done;
+		if (xc[i].max_occurs != 0 && occur > xc[i].max_occurs)
+			goto done;
+	}
+	XMLSD_ELEM_FOREACH_CHILDREN(xi, xe) {
+		for (cmd = NULL, i = 0; xc[i].element != NULL; i++)
+			if (!strcmp(xc[i].element, xi->name) &&
+			    !xmlsd_check_path(xi, xc[i].path))
+				cmd = &xc[i];
+		if (cmd == NULL) {
+			goto done;
+		}
+		rv = xmlsd_validate_element(xd, xi, cmd, xc);
+		if (rv != 0)
+			goto done;
+	}
+	rv = 0;
+done:
+	return (rv);
+}
+/*
+ * Validate XML
+ * 
+ * The structures used for validation assume a structure with one  top-level
+ * command containing all other tags. Furthermore recursive structures
+ * can not be defined and validated at this time.
+ */
 int
-xmlsd_validate(struct xmlsd_element_list *xl, struct xmlsd_v_elements *els)
+xmlsd_validate(struct xmlsd_document *xd, struct xmlsd_v_elements *els)
 {
 	struct xmlsd_element	*xe;
 	struct xmlsd_v_elem	*xc = NULL, *cmd;
-	int			 i, rv = 1, occur;
-	char			*dot;
-	char			 xe_path[1024];
+	int			 i, rv = 1;
 
-
-	if (TAILQ_EMPTY(xl))
-		goto done;
 
 	/* find command */
-	xe = TAILQ_FIRST(xl);
-	if (xe == NULL)
+	if ((xe = xmlsd_doc_get_first_elem(xd)) == NULL)
 		goto done;
 
 	/* must not have a parent */
@@ -538,51 +588,15 @@ xmlsd_validate(struct xmlsd_element_list *xl, struct xmlsd_v_elements *els)
 	if (xc == NULL)
 		goto done;
 
-	TAILQ_FOREACH(xe, xl, entry) {
-		/* find element */
-		if (xe == TAILQ_FIRST(xl))
-			cmd = xc;
-		else {
-			for (cmd = NULL, i = 0; xc[i].element != NULL; i++)
-				if (!strcmp(xc[i].element, xe->name) &&
-				    !xmlsd_check_path(xe, xc[i].path))
-					cmd = &xc[i];
-		}
-		if (cmd == NULL)
+	i = 0;
+	XMLSD_DOC_FOREACH_ELEM(xe, xd) {
+		/* should only be one of these... */
+		if (++i > 1)
 			goto done;
-
-		/* check attributes */
-		if (xmlsd_check_attributes(xe, cmd->attr))
+		cmd = xc;
+		rv = xmlsd_validate_element(xd, xe, cmd, xc);
+		if (rv)
 			goto done;
-
-		/*
-		 * Element occurrence validation.
-		 */
-
-		if (xmlsd_calc_path(xe, xe_path, sizeof xe_path))
-			goto done;
-		for (i = 0; xc[i].element != NULL; i++) {
-			if (xc[i].path == NULL)
-				continue;	/* xc[i] is root. */
-			if (xc[i].min_occurs == 0 && xc[i].max_occurs == 0)
-				continue;	/* xc[i] occur irrelevant. */
-
-			dot = strchr(xc[i].path, '.');
-			if (dot == NULL)
-				continue;	/* xc[i] is no child. */
-			if (strcmp(xe_path, dot + 1))
-				continue;	/* xc[i] is stranger child. */
-
-			/*
-			 * xc[i] is a child of xe and has occurrence
-			 * constraints.
-			 */
-			occur = xmlsd_occurrences(xl, xe, xc[i].element);
-			if (occur < xc[i].min_occurs)
-				goto done;
-			if (xc[i].max_occurs != 0 && occur > xc[i].max_occurs)
-				goto done;
-		}
 	}
 
 	rv = 0;
@@ -590,63 +604,3 @@ done:
 	return (rv);
 }
 
-char *
-xmlsd_get_value(struct xmlsd_element_list *xl, char *findme,
-    struct xmlsd_element **xe_ret)
-{
-	struct xmlsd_element	*xe;
-
-	if (xl == NULL || findme == NULL)
-		return (NULL);
-
-	TAILQ_FOREACH(xe, xl, entry) {
-		if (!strcmp(xe->name, findme)) {
-			if (xe_ret)
-				*xe_ret = xe;
-			return (xe->value);
-		}
-	}
-
-	return (NULL);
-}
-
-char *
-xmlsd_get_attr(struct xmlsd_element *xe, char *findme)
-{
-	struct xmlsd_attribute	*xa;
-
-	if (xe == NULL || findme == NULL)
-		return (NULL);
-
-	TAILQ_FOREACH(xa, &xe->attr_list, entry) {
-		if (!strcmp(xa->name, findme))
-			return (xa->value);
-	}
-	return (NULL);
-}
-
-int
-xmlsd_check_boolean(char *s, int *v)
-{
-	int			rv = 1, r = -1;
-
-	if (s == NULL)
-		goto done;
-
-	if (!strcmp(s, "true") || !strcmp(s, "1"))
-		r = 1;
-	else if (!strcmp(s, "false") || !strcmp(s, "0"))
-		r = 0;
-	else
-		goto done;
-
-	if (r == -1)
-		goto done;
-
-	if (v)
-		*v = r;
-
-	rv = 0;
-done:
-	return (rv);
-}
