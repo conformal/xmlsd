@@ -91,7 +91,7 @@ xmlsd_chardata(void *data, const XML_Char *s, int len)
 
 	if (ctx->value == NULL) {
 		/* eat all blanks in front because expat isn't smart */
-		while (isblank(s[0])) {
+		while (isblank(s[0]) && len > 0) {
 			s += 1;
 			len -= 1;
 		}
