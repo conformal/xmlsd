@@ -104,9 +104,9 @@ xmlsd_chardata(void *data, const XML_Char *s, int len)
 		ctx->tot_size += XMLSD_PAGE_SIZE;
 	}
 
-	/* check for overflow */
-	if (ctx->value_at + len > ctx->tot_size) {
-		for (newlen = ctx->tot_size; newlen < ctx->value_at + len;
+	/* check for overflow (DO NOT FORGET NUL!) */
+	if (ctx->value_at + len + 1 > ctx->tot_size) {
+		for (newlen = ctx->tot_size; newlen < ctx->value_at + len + 1;
 		    newlen += XMLSD_PAGE_SIZE)
 			;
 
