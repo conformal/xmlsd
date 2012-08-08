@@ -49,7 +49,8 @@ LDFLAGS +=
 SHARED_OBJ_EXT ?= o
 
 LIB.NAME = xmlsd
-LIB.SRCS = xmlsd.c xmlsd_generate.c
+LIB.SRCS = xmlsd.c xmlsd_document.c xmlsd_element.c xmlsd_attribute.c
+LIB.SRCS += xmlsd_generate.c 
 LIB.HEADERS = xmlsd.h
 LIB.MANPAGES = xmlsd.3
 LIB.MLINKS  =xmlsd.3 xmlsd_add_element.3
