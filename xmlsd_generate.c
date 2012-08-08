@@ -21,6 +21,71 @@
 
 #define NL "\r\n"
 
+/*
+ * encode characters that are invalid in xml attributes and values and return
+ * a pointer to the end of the string (the NUL terminated part).
+ *
+ * if dry_run is set don't actually change teh data, just calculate the length.
+ */
+static char *
+encode_data(char *buf, const char *data, int dry_run)
+{
+	while (*data != '\0') {
+		if (*data == '&') {
+			if (dry_run != 0) {
+				buf[0] = '&';
+				buf[1] = 'a';
+				buf[2] = 'm';
+				buf[3] = 'p';
+				buf[4] = ';';
+			}
+			buf += 5;	/* &amp; */
+		} else if (*data == '<') {
+			if (dry_run != 0) {
+				buf[0] = '&';
+				buf[1] = 'l';
+				buf[2] = 't';
+				buf[3] = ';';
+			}
+
+			buf += 4;	/* &lt; */
+		} else if (*data == '>') {
+			if (dry_run != 0) {
+				buf[0] = '&';
+				buf[1] = 'g';
+				buf[2] = 't';
+				buf[3] = ';';
+			}
+			buf += 4;	/* &gt; */
+		} else if (*data == '"') {
+			if (dry_run != 0) {
+				buf[0] = '&';
+				buf[1] = 'q';
+				buf[2] = 'u';
+				buf[3] = 'o';
+				buf[4] = 't';
+				buf[5] = ';';
+			}
+			buf += 6;
+		} else {
+			/* no encoding, just copy */
+			if (dry_run != 0)
+				*buf = *data;
+			buf++;
+		}
+		data++;
+	}
+	/*
+	 * Don't forget to NUL terminate, strictly not needed due to context
+	 * as this will never be the last thing to touch the buffer.
+	 */
+	if (dry_run != 0) {
+		*buf = '\0';
+	}
+
+	return (buf);
+}
+
 size_t
 xmlsd_generate_elem(struct xmlsd_element *xe, char *buf, size_t bufsz,
     int dry_run)
@@ -31,9 +96,14 @@ xmlsd_generate_elem(struct xmlsd_element *xe, char *buf, size_t bufsz,
 
 	obuf += snprintf(obuf, buf ? bufsz - (obuf-buf) : 0,
 	    "%*s<%s", xe->depth * 2, "", xe->name);
-	XMLSD_ELEM_FOREACH_ATTR(xa, xe)
+	XMLSD_ELEM_FOREACH_ATTR(xa, xe) {
 		obuf += snprintf(obuf, dry_run ? bufsz - (obuf-buf) : 0,
-		    " %s=\"%s\"", xa->name, xa->value);
+		    " %s=\"", xa->name);
+		obuf = encode_data(obuf, xa->value, dry_run);
+		/* it would likely be more efficient to inline this */
+		obuf += snprintf(obuf, dry_run ? bufsz - (obuf-buf) : 0,
+		    "\"");
+	}
 
 	/* should have only one of children or value */
 	if (xmlsd_elem_get_first_child(xe) == NULL && xe->value == NULL) {
@@ -41,7 +111,10 @@ xmlsd_generate_elem(struct xmlsd_element *xe, char *buf, size_t bufsz,
 		    "/>" NL);
 	} else if (xe->value != NULL) {
 		obuf += snprintf(obuf, dry_run ? bufsz - (obuf-buf)
-			    : 0, ">%s</%s>" NL, xe->value, xe->name);
+			    : 0, ">");
+		obuf = encode_data(obuf, xe->value, dry_run);
+		obuf += snprintf(obuf, dry_run ? bufsz - (obuf-buf)
+			    : 0, "</%s>" NL, xe->name);
 	} else {
 		obuf += snprintf(obuf, dry_run ? bufsz - (obuf-buf) : 0,
 		    ">" NL);
