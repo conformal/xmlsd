@@ -399,7 +399,7 @@ xmlsd_calc_path(struct xmlsd_element *xe, char *mypath, size_t mypathlen)
 	return 0;
 }
 
-int
+static int
 xmlsd_check_path(struct xmlsd_element *xe, char *path)
 {
 	int			rv = 1;
@@ -422,7 +422,7 @@ done:
 	return (rv);
 }
 
-int
+static int
 xmlsd_check_attributes(struct xmlsd_element *xe, struct xmlsd_v_attr *attrs)
 {
 	struct xmlsd_attribute	*xa;

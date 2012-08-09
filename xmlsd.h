@@ -180,9 +180,6 @@ void			 xmlsd_doc_remove_elem(struct xmlsd_document *,
 			     struct xmlsd_element *);
 
 /* validation */
-int			 xmlsd_check_path(struct xmlsd_element *, char *);
-int			 xmlsd_check_attributes(struct xmlsd_element *,
-			    struct xmlsd_v_attr *);
 int			 xmlsd_validate(struct xmlsd_document *,
 			    struct xmlsd_v_elements *);
 
