@@ -21,64 +21,127 @@
 .Nd xml validation library
 .Sh SYNOPSIS
 .Fd #include <xmlsd.h>
-.Ft struct xmlsd_element *
-.Fn xmlsd_add_element "struct xmlsd_element_list *xel" "struct xmlsd_element *xe" "const char *"
 .Ft int
-.Fn xmlsd_check_attributes "struct xmlsd_element *xe" "struct xmlsd_v_attr *xva"
-.Ft int
-.Fn xmlsd_check_boolean "char *" "int *"
-.Ft int
-.Fn xmlsd_check_path "struct xmlsd_element *xe" "char *path"
-.Ft struct xmlsd_element *
-.Fn xmlsd_create "struct xmlsd_element_list *xel" "const char *field"
+.Fn xmlsd_doc_alloc "struct xmlsd_document **xdp"
 .Ft void
-.Fn xmlsd_free_element "struct xmlsd_element *xe"
-.Ft char *
-.Fn xmlsd_generate "struct xmlsd_element_list *xel" "void *(*alloc_fn)(size_t)" "size_t *sz" "int withhdr"
-.Ft char *
-.Fn xmlsd_get_attr "struct xmlsd_element *xe" "char *key"
-.Ft char *
-.Fn xmlsd_get_value "struct xmlsd_element_list *xel" "char *key" "struct xmlsd_element **xe"
-.Ft int
-.Fn xmlsd_parse_file "FILE *stream" "struct xmlsd_element_list *xel"
-.Ft int
-.Fn xmlsd_parse_fileds "int fd" "struct xmlsd_element_list *xel"
-.Ft int
-.Fn xmlsd_parse_mem "char *mem" "size_t sz" "struct xmlsd_element_list *xel"
+.Fn xmlsd_doc_clear "struct xmlsd_document *xd"
 .Ft void
-.Fn xmlsd_remove_element "struct xmlsd_element_list *xel" "struct xmlsd_element *xe"
+.Fn xmlsd_doc_free "struct xmlsd_document *xd"
 .Ft int
-.Fn xmlsd_set_attr "struct xmlsd_element *xe" "const char *" "const char *"
+.Fn xmlsd_doc_is_empty "struct xmlsd_document *xd"
+.Ft struct xmlsd_element *
+.Fn xmlsd_doc_get_first_elem "struct xmlsd_document *xd"
+.Ft struct xmlsd_element *
+.Fn xmlsd_doc_get_next_elem "struct xmlsd_document *xd" "struct xmlsd_element *cur"
+.Ft struct xmlsd_element *
+.Fn xmlsd_doc_get_last_elem "struct xmlsd_document *xd"
+.Ft struct xmlsd_element *
+.Fn xmlsd_doc_get_previous_elem "struct xmlsd_document *xd" "struct xmlsd_element *cur"
+.Fn XMLSD_DOC_FOREACH_ELEM "struct xmlsd_element *xe" "struct xmlsd_document *xd"
+.Ft const char *
+.Fn xmlsd_doc_find_value "struct xmlsd_document *xd" "const char *name" "struct xmlsd_element **xep"
+.Ft struct xmlsd_element *
+.Fn xmlsd_doc_add_elem "struct xmlsd_document *xd" "struct xmlsd_element *parent" "const char *name"
+.Ft void
+.Fn xmlsd_doc_remove_elem "struct xmlsd_document *xd" "struct xmlsd_element *xe"
+
 .Ft int
-.Fn xmlsd_set_attr_int32 "struct xmlsd_element *xe" "const char *" "int32_t"
+.Fn xmlsd_validate "struct xmlsd_document *xd" "struct xmlsd_v_elements *v_elem"
+
 .Ft int
-.Fn xmlsd_set_attr_int64 "struct xmlsd_element *xe" "const char *" "int64_t"
+.Fn xmlsd_parse_fileds "int fd" "struct xmlsd_document *xd"
 .Ft int
-.Fn xmlsd_set_attr_uint32 "struct xmlsd_element *xe" "const char *" "uint32_t"
+.Fn xmlsd_parse_file "FILE *file" "struct xmlsd_document *xd"
 .Ft int
-.Fn xmlsd_set_attr_uint64 "struct xmlsd_element *xe" "const char *" "uint64_t"
+.Fn xmlsd_parse_mem "const char *buf" "size_t len" "struct xmlsd_document *xd"
+
+.Ft char *
+.Fn xmlsd_generate "struct xmlsd_document *xd" "void *(*alloc_fn)(size_t)" "size_t *szp" "int flags"
+
+
+.Ft const char *
+.Fn xmlsd_attr_get_name "struct xmlsd_attribute *xa"
+.Ft const char *
+.Fn xmlsd_attr_get_value "struct xmlsd_attribute *xa"
+
+
+.Ft const char *
+.Fn xmlsd_elem_get_name "struct xmlsd_element *xe"
+.Ft const char *
+.Fn xmlsd_elem_get_value "struct xmlsd_element *xe"
+.Ft long long
+.Fn xmlsd_elem_get_value_strtonum "struct xmlsd_elment *xd" "unsigned long long minval" "unsigned long long maxval" "const char **errstring"
+.Ft unsigned long long
+.Fn xmlsd_elem_get_value_hexnum "struct xmlsd_elment *xd" "unsigned long long minval" "unsigned long long maxval" "const char **errstring"
 .Ft int
-.Fn xmlsd_set_attr_x32 "struct xmlsd_element *xe" "const char *" "uint32_t"
+.Fn xmlsd_elem_get_value_boolean "struct xmlsd_element *xe" "int *bool" "int
+default"
 .Ft int
-.Fn xmlsd_set_attr_x64 "struct xmlsd_element *xe" "const char *" "uint64_t"
+.Fn xmlsd_elem_get_depth "struct xmlsd_element *xe"
+.Ft struct xmlsd_element *
+.Fn xmlsd_elem_get_parent "struct xmlsd_element *"
+.Ft const char *
+.Fn xmlsd_elem_get_attr "struct xmlsd_element *xe" "const char *name"
+.Ft long long
+.Fn xmlsd_elem_get_attr_strtonum "struct xmlsd_elment *xd" "const char *name" "unsigned long long minval" "unsigned long long maxval" "const char **errstring"
+.Ft unsigned long long
+.Fn xmlsd_elem_get_attr_hexnum "struct xmlsd_elment *xd" "const char *name" "unsigned long long minval" "unsigned long long maxval" "const char **errstring"
 .Ft int
-.Fn xmlsd_set_value "struct xmlsd_element *xe" "const char *value"
+.Fn xmlsd_elem_get_attr_boolean "struct xmlsd_element *xe" "const char *name" "int *bool" "int
+.Ft struct xmlsd_attribute *
+.Fn xmlsd_elem_find_attr "struct xmlsd_element *xe" "const char *name"
+.Ft struct xmlsd_attribute *
+.Fn xmlsd_elem_get_first_attr "struct xmlsd_element *xe"
+.Ft struct xmlsd_attribute *
+.Fn xmlsd_elem_get_next_attr "struct xmlsd_element *xe" "struct xmlsd_attribute *cur"
+.Ft struct xmlsd_attribute *
+.Fn xmlsd_elem_get_last_attr "struct xmlsd_element *xe"
+.Ft struct xmlsd_attribute *
+.Fn xmlsd_elem_get_previous_attr "struct xmlsd_element *xe" "struct xmlsd_attribute *cur"
+.Fn XMLSD_ELEM_FOREACH_ATTR "struct xmlsd_attribute *attr" "struct xmlsd_element *elem"
+.Ft struct xmlsd_element *
+.Fn xmlsd_elem_find_child "struct xmlsd_elment *xe" "const char *name"
+.Ft struct xmlsd_element *
+.Fn xmlsd_elem_get_first_child "struct xmlsd_elment *xe"
+.Ft struct xmlsd_element *
+.Fn xmlsd_elem_get_next_child "struct xmlsd_elment *xe" "struct xmlsd_element *cur"
+.Ft struct xmlsd_element *
+.Fn xmlsd_elem_get_last_child "struct xmlsd_elment *xe"
+.Ft struct xmlsd_element *
+.Fn xmlsd_elem_get_previous_child "struct xmlsd_elment *xe" "struct xmlsd_element *cur"
+.Fn XMLSD_ELEM_FOREACH_CHILDREN "struct xmlsd_element *child" "struct xmlsd_element *elem"
+
+.Ft int	
+.Fn xmlsd_elem_set_attr "struct xmlsd_element *xe" "const char *name" "const char *value"
 .Ft int
-.Fn xmlsd_set_value_int32 "struct xmlsd_element *xe" "int32_t"
+.Fn xmlsd_elem_set_attr_int32 "struct xmlsd_element *xe" "const char *name" "int32_t value"
 .Ft int
-.Fn xmlsd_set_value_int64 "struct xmlsd_element *xe" "int64_t"
+.Fn xmlsd_elem_set_attr_uint32  "struct xmlsd_element *xe" "const char *name" "uint32_t value"
 .Ft int
-.Fn xmlsd_set_value_uint32 "struct xmlsd_element *xe" "uint32_t"
+.Fn xmlsd_elem_set_attr_int64 "struct xmlsd_element *xe" "const char *name" "int64_t value"
 .Ft int
-.Fn xmlsd_set_value_uint64 "struct xmlsd_element *xe" "uint64_t"
+.Fn xmlsd_elem_set_attr_uint64 "struct xmlsd_element *xe" "const char *name" "uint64_t value"
 .Ft int
-.Fn xmlsd_set_value_x32 "struct xmlsd_element *xe" "uint32_t"
+.Fn xmlsd_elem_set_attr_x32 "struct xmlsd_element *xe" "const char *name" "uint32_t value"
 .Ft int
-.Fn xmlsd_set_value_x64 "struct xmlsd_element *xe" "uint64_t"
+.Fn xmlsd_elem_set_attr_x64 "struct xmlsd_element *xe" "const char *name" "uint64_t value"
 .Ft int
-.Fn xmlsd_unwind "struct xmlsd_element_list *xel"
+.Fn xmlsd_elem_set_value "struct xmlsd_element *xe" "const char *value"
 .Ft int
-.Fn xmlsd_validate "struct xmlsd_element_list *xel" "struct xmlsd_v_elements *xve"
+.Fn xmlsd_elem_set_value_int32 "struct xmlsd_element *xe" "int32_t value"
+.Ft int
+.Fn xmlsd_elem_set_value_uint32 "struct xmlsd_element *xe" "uint32_t value"
+.Ft int
+.Fn xmlsd_elem_set_value_int64 "struct xmlsd_element *xe" "int64_t value"
+.Ft int
+.Fn xmlsd_elem_set_value_uint64 "struct xmlsd_element *xe" "uint64_t value"
+.Ft int
+.Fn xmlsd_elem_set_value_x32 "struct xmlsd_element *xe" "uint32_t value"
+.Ft int
+.Fn xmlsd_elem_set_value_x64 "struct xmlsd_element *xe" "uint64_t value"
+.Ft void
+.Fn xmlsd_elem_free "struct xmlsd_element *xe"
+
 .Ft void
 .Fn xmlsd_version "int *major" "int *minor" "int *patch"
 .Sh HISTORY
