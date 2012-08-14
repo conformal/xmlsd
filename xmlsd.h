@@ -152,8 +152,9 @@ int			 xmlsd_doc_alloc(struct xmlsd_document **);
 void			 xmlsd_doc_clear(struct xmlsd_document *);
 void			 xmlsd_doc_free(struct xmlsd_document *);
 int			 xmlsd_doc_is_empty(struct xmlsd_document *);
-struct xmlsd_element	*xmlsd_doc_get_first_elem(struct xmlsd_document *);
-
+struct xmlsd_element	*xmlsd_doc_get_root(struct xmlsd_document *);
+#define	xmlsd_doc_get_first_elem(doc) xmlsd_doc_get_root(doc)
+ 
 int			 xmlsd_parse_fileds(int, struct xmlsd_document *);
 int			 xmlsd_parse_file(FILE *, struct xmlsd_document  *);
 int			 xmlsd_parse_mem(const char *, size_t,

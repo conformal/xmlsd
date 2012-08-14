@@ -148,8 +148,8 @@ xmlsd_doc_is_empty(struct xmlsd_document *xd)
 /*
  * Get the first top-level element in xd NULL if it is empty.
  */
-struct xmlsd_element	*
-xmlsd_doc_get_first_elem(struct xmlsd_document *xd)
+struct xmlsd_element *
+xmlsd_doc_get_root(struct xmlsd_document *xd)
 {
 	return (xd->root);
 }
