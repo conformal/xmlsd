@@ -154,7 +154,8 @@ xmlsd_start(void *data, const char *el, const char **attr)
 	if (ctx->xml_last != NULL) {
 		TAILQ_INSERT_TAIL(&ctx->xml_last->children, xe, entry);
 	} else { /* top level */
-		TAILQ_INSERT_TAIL(&ctx->xml_el->children, xe, entry);
+		/* XXX verify this is the first and only */
+		ctx->xml_el->root = xe;
 	}
 	xe->name = strdup(el);
 	if (xe->name == NULL)
@@ -559,6 +560,7 @@ xmlsd_validate_element(struct xmlsd_document *xd, struct xmlsd_element *xe,
 done:
 	return (rv);
 }
+
 /*
  * Validate XML
  * 
@@ -570,7 +572,7 @@ int
 xmlsd_validate(struct xmlsd_document *xd, struct xmlsd_v_elements *els)
 {
 	struct xmlsd_element	*xe;
-	struct xmlsd_v_elem	*xc = NULL, *cmd;
+	struct xmlsd_v_elem	*cmd = NULL;
 	int			 i, rv = 1;
 
 
@@ -584,22 +586,14 @@ xmlsd_validate(struct xmlsd_document *xd, struct xmlsd_v_elements *els)
 
 	for (i = 0; els[i].name != NULL; i++)
 		if (!strcmp(els[i].name, xe->name))
-			xc = els[i].cmd;
-	if (xc == NULL)
+			cmd = els[i].cmd;
+	if (cmd == NULL)
 		goto done;
 
-	i = 0;
-	XMLSD_DOC_FOREACH_ELEM(xe, xd) {
-		/* should only be one of these... */
-		if (++i > 1)
-			goto done;
-		cmd = xc;
-		rv = xmlsd_validate_element(xd, xe, cmd, xc);
-		if (rv)
-			goto done;
-	}
 
-	rv = 0;
+	/* this will recuse over the whole tree */
+	rv = xmlsd_validate_element(xd, xe, cmd, cmd);
+
 done:
 	return (rv);
 }

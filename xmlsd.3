@@ -32,15 +32,6 @@
 .Ft struct xmlsd_element *
 .Fn xmlsd_doc_get_first_elem "struct xmlsd_document *xd"
 .Ft struct xmlsd_element *
-.Fn xmlsd_doc_get_next_elem "struct xmlsd_document *xd" "struct xmlsd_element *cur"
-.Ft struct xmlsd_element *
-.Fn xmlsd_doc_get_last_elem "struct xmlsd_document *xd"
-.Ft struct xmlsd_element *
-.Fn xmlsd_doc_get_previous_elem "struct xmlsd_document *xd" "struct xmlsd_element *cur"
-.Fn XMLSD_DOC_FOREACH_ELEM "struct xmlsd_element *xe" "struct xmlsd_document *xd"
-.Ft const char *
-.Fn xmlsd_doc_find_value "struct xmlsd_document *xd" "const char *name" "struct xmlsd_element **xep"
-.Ft struct xmlsd_element *
 .Fn xmlsd_doc_add_elem "struct xmlsd_document *xd" "struct xmlsd_element *parent" "const char *name"
 .Ft void
 .Fn xmlsd_doc_remove_elem "struct xmlsd_document *xd" "struct xmlsd_element *xe"

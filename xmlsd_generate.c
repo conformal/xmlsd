@@ -134,7 +134,6 @@ char *
 xmlsd_generate(struct xmlsd_document *xd, void *(*alloc_fn)(size_t),
     size_t *xmlszp, int flags)
 {
-        struct xmlsd_element	*xe;
 	char			*obuf, *buf;
 	size_t			bufsz;
 
@@ -152,8 +151,8 @@ for_real:
 		obuf += snprintf(obuf, buf ? bufsz - (obuf-buf) : 0,
 		    "<?xml version=\"1.0\"?>" NL NL);
 	}
-	XMLSD_DOC_FOREACH_ELEM(xe, xd)
-		obuf += xmlsd_generate_elem(xe, obuf, buf ?
+	if (xd->root != NULL)
+		obuf += xmlsd_generate_elem(xd->root, obuf, buf ?
 		    bufsz - (obuf - buf) : 0, buf != NULL);
 	if (buf == NULL) {
 		bufsz = obuf - buf;

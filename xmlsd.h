@@ -153,18 +153,6 @@ void			 xmlsd_doc_clear(struct xmlsd_document *);
 void			 xmlsd_doc_free(struct xmlsd_document *);
 int			 xmlsd_doc_is_empty(struct xmlsd_document *);
 struct xmlsd_element	*xmlsd_doc_get_first_elem(struct xmlsd_document *);
-struct xmlsd_element	*xmlsd_doc_get_next_elem(struct xmlsd_document *,
-			     struct xmlsd_element *);
-struct xmlsd_element	*xmlsd_doc_get_last_elem(struct xmlsd_document *);
-struct xmlsd_element	*xmlsd_doc_get_previous_elem(struct xmlsd_document *,
-			     struct xmlsd_element *);
-/* foreach each top level element in a document */
-#define XMLSD_DOC_FOREACH_ELEM(elem, doc)				\
-	for ((elem) = xmlsd_doc_get_first_elem(doc); (elem) != NULL;	\
-	   (elem) = xmlsd_doc_get_next_elem(doc, elem))
-/* searches top level for a named value */
-const char		*xmlsd_doc_find_value(struct xmlsd_document *,
-			     const char *, struct xmlsd_element **);
 
 int			 xmlsd_parse_fileds(int, struct xmlsd_document *);
 int			 xmlsd_parse_file(FILE *, struct xmlsd_document  *);

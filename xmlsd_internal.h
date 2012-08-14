@@ -17,5 +17,5 @@ struct xmlsd_element {
 };
 
 struct xmlsd_document {
-	struct xmlsd_element_list	 children;
+	struct xmlsd_element		*root;
 };

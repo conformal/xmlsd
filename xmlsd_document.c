@@ -34,7 +34,7 @@ xmlsd_doc_alloc(struct xmlsd_document **xdp)
 	if (xd == NULL)
 		return (XMLSD_ERR_RESOURCE);
 
-	TAILQ_INIT(&xd->children);
+	xd->root = NULL;
 	*xdp = xd;
 	return (XMLSD_ERR_SUCCES);
 }
@@ -98,8 +98,11 @@ xmlsd_doc_add_elem(struct xmlsd_document *xd, struct xmlsd_element *xe,
 
 	if (xe)
 		TAILQ_INSERT_TAIL(&xe->children, nxe, entry);
-	else
-		TAILQ_INSERT_TAIL(&xd->children, nxe, entry);
+	else {
+		if (xd->root != NULL)
+			goto fail;
+		xd->root = nxe;
+	}
 
 	return nxe;
 
@@ -121,15 +124,16 @@ xmlsd_doc_remove_elem(struct xmlsd_document *xd, struct xmlsd_element *xe)
 {
 	struct xmlsd_element	*xc;
 
-	if (xe == NULL || xd == NULL || TAILQ_EMPTY(&xd->children))
+	if (xe == NULL || xd == NULL || xd->root == NULL)
 		return;
 
 	while ((xc = xmlsd_elem_get_first_child(xe)) != NULL)
 		xmlsd_doc_remove_elem(xd, xc);
 	if (xe->parent)
 		TAILQ_REMOVE(&xe->parent->children, xe, entry);
-	else
-		TAILQ_REMOVE(&xd->children, xe, entry);
+	else {
+		xd->root = NULL;
+	}
 	xmlsd_elem_free(xe);
 }
 /*
@@ -138,7 +142,7 @@ xmlsd_doc_remove_elem(struct xmlsd_document *xd, struct xmlsd_element *xe)
 int
 xmlsd_doc_is_empty(struct xmlsd_document *xd)
 {
-	return (TAILQ_EMPTY(&xd->children));
+	return (xd->root == NULL);
 }
 
 /*
@@ -147,58 +151,5 @@ xmlsd_doc_is_empty(struct xmlsd_document *xd)
 struct xmlsd_element	*
 xmlsd_doc_get_first_elem(struct xmlsd_document *xd)
 {
-	return (TAILQ_FIRST(&xd->children));
-}
-
-/*
- * Get the top-level element in xd after `cur' or NULL if it is the last.
- */
-struct xmlsd_element	*
-xmlsd_doc_get_next_elem(struct xmlsd_document *xd, struct xmlsd_element *cur)
-{
-	return (TAILQ_NEXT(cur, entry));
-}
-
-/*
- * Get last top-level element in xd NULL if it is empty.
- */
-struct xmlsd_element	*
-xmlsd_doc_get_last_elem(struct xmlsd_document *xd)
-{
-	return (TAILQ_LAST(&xd->children, xmlsd_element_list));
-}
-
-/*
- * Get the top-level element in xd prior to `cur' or NULL if it is the first.
- */
-struct xmlsd_element	*
-xmlsd_doc_get_previous_elem(struct xmlsd_document *xd,
-    struct xmlsd_element *cur)
-{
-	return (TAILQ_PREV(cur, xmlsd_element_list, entry));
-}
-
-/*
- * Search the list of top level elements in the document for one called
- * ``findme'' and return the value of that element. If xe_ret is non-NULL
- * additionally return the xmlsd_element structure related to that element.
- */
-const char *
-xmlsd_doc_find_value(struct xmlsd_document *xd, const char *findme,
-   struct xmlsd_element **xe_ret)
-{
-	struct xmlsd_element	*xe;
-
-	if (xd == NULL || findme == NULL)
-		return (NULL);
-
-	TAILQ_FOREACH(xe, &xd->children, entry) {
-		if (!strcmp(xe->name, findme)) {
-			if (xe_ret)
-				*xe_ret = xe;
-			return (xe->value);
-		}
-	}
-
-	return (NULL);
+	return (xd->root);
 }
