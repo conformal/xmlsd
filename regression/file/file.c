@@ -48,9 +48,8 @@ main(int argc, char *argv[])
 
 	if (xmlsd_parse_file(stdin, xd) != XMLSD_ERR_SUCCES)
 		errx(1, "xmlsd_parse");
-	XMLSD_DOC_FOREACH_ELEM(xe, xd) {
+	if ((xe = xmlsd_doc_get_first_elem(xd)) != NULL)
 		print_element(xe);
-	}
 
 	xmlsd_doc_free(xd);
 

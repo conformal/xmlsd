@@ -81,9 +81,8 @@ thread_it(void *p)
 	if (xmlsd_parse_mem(b, sb.st_size, xd) != XMLSD_ERR_SUCCES)
 		errx(1, "xmlsd_parse");
 	if (verbose) {
-		XMLSD_DOC_FOREACH_ELEM(xe, xd) {
+		if ((xe = xmlsd_doc_get_first_elem(xd)) != NULL)
 			print_element(xe);
-		}
 	}
 
 	xmlsd_doc_free(xd);
@@ -114,7 +113,8 @@ main(int argc, char *argv[])
 
 	memset(thr, 0, sizeof(thr));
 	for (i = 0; i < MAX_THREADS;) {
-		if (pthread_create(&thr[i], NULL, thread_it, (void *)argv[1]) == NULL) {
+		if (pthread_create(&thr[i], NULL, thread_it,
+		    (void *)argv[1]) != 0) {
 			/* thread create stalled, just try again */
 			continue;
 		}

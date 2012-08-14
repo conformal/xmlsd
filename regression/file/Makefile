@@ -1,13 +1,20 @@
 
 PROG=file
-#MAN=file.8
 NOMAN=
 
+.if ${.CURDIR} == ${.OBJDIR}
+LDADD+= -L${.CURDIR}/../../
+.elif ${.CURDIR}/obj == ${.OBJDIR}
+LDADD+= -L${.CURDIR}/../../obj
+.else
+LDADD+= -L${.OBJDIR}/../../
+.endif
+
 SRCS= file.c
-#COPT+= -O2
 DEBUG+= -g
 CFLAGS+= -Wall
 CFLAGS+= -I../../
-LDFLAGS+= -lexpat -L../../ -lxmlsd
+CFLAGS+=-I${.CURDIR}/../../
+LDADD+= -lexpat -lxmlsd
 
 .include <bsd.prog.mk>
