@@ -1,3 +1,12 @@
+xmlsd (0.9.0-1) unstable; urgency=low
+
+  * Properly escape reserved characters in xml attributes and values
+  * Change xmlsd API to model xml tree instead of a list emulating a tree
+  * Fix input buffer overflows where xml len was not properly checked
+  * Add support for Bitrig
+
+ -- Conformal Systems <package-discuss@conformal.com>  Wed, 15 Aug 2012 15:59:39 -0500
+
 xmlsd (0.8.1-1) unstable; urgency=low
 
   * Support clang builds

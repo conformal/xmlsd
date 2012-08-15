@@ -1,6 +1,6 @@
 
 %define name		xmlsd
-%define version		0.8.1
+%define version		0.9.0
 %define release		1
 
 Name: 		%{name}
@@ -57,6 +57,11 @@ develop applications with xmlsd.
 /usr/lib/libxmlsd.a
 
 %changelog
+* Wed Aug 15 2012 - davec 0.9.0-1
+- Properly escape reserved characters in xml attributes and values
+- Change xmlsd API to model xml tree instead of a list emulating a tree
+- Fix input buffer overflows where xml len was not properly checked
+- Add support for Bitrig
 * Tue Jul 17 2012 - davec 0.8.1-1
 - Support clang builds
 - Fix non-release build versioning
