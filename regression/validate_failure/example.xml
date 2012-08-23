@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+
+<filesystem version="1">
+  <dir version="1" name="foo"/>
+  <dir version="1" name="bar">
+  <file version="1" name="a"/>
+  <file version="1" name="b"/>
+  <file version="1" name="c"/>
+  </dir>
+  <dir version="1" name="baz">
+  <file version="1" name="d"/>
+  <file version="1" name="e"/>
+  <file version="1" name="f"/>
+  <file version="1" name="g"/>
+  </dir>
+  <dir version="1"/>
+</filesystem>

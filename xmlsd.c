@@ -54,11 +54,12 @@ struct xmlsd_context {
 	return;						\
 } while (0)
 
-static int	xmlsd_calc_path(struct xmlsd_element *, char *, size_t);
+
+static enum xmlsd_validate_reason
+		xmlsd_calc_path(struct xmlsd_element *, char *, size_t);
 static void	xmlsd_chardata(void *, const XML_Char *, int);
 static void	xmlsd_end(void *, const char *);
-static int	xmlsd_occurrences(struct xmlsd_document *,
-		    struct xmlsd_element *, const char *);
+static int	xmlsd_occurrences(struct xmlsd_element *, const char *);
 static void	xmlsd_parse_done(struct xmlsd_context *);
 static int	xmlsd_parse_setup(struct xmlsd_context *,
 		    struct xmlsd_document *);
@@ -384,7 +385,7 @@ done:
 	return (rv);
 }
 
-static int
+static enum xmlsd_validate_reason
 xmlsd_calc_path(struct xmlsd_element *xe, char *mypath, size_t mypathlen)
 {
 	struct xmlsd_element	*current;
@@ -394,10 +395,10 @@ xmlsd_calc_path(struct xmlsd_element *xe, char *mypath, size_t mypathlen)
 		if (xe != current)
 			strlcat(mypath, ".", mypathlen);
 		if (strlcat(mypath, current->name, mypathlen) >= mypathlen)
-			return 1;	/* Insufficient space. */
+			return XMLSD_VALIDATE_PATH_TOO_LONG;
 	}
 
-	return 0;
+	return XMLSD_VALIDATE_NO_ERROR;
 }
 
 static int
@@ -423,15 +424,22 @@ done:
 	return (rv);
 }
 
-static int
-xmlsd_check_attributes(struct xmlsd_element *xe, struct xmlsd_v_attr *attrs)
+static enum xmlsd_validate_reason
+xmlsd_check_attributes(struct xmlsd_element *xe, struct xmlsd_v_attr *attrs,
+    struct xmlsd_validate_failure *xvf)
 {
 	struct xmlsd_attribute	*xa;
 	int			i, found, rv = 1;
 
 	if (!attrs) {
+		/* XXX do we want a special code for this? */
+		xvf->xvf_reason = rv =
+		    XMLSD_VALIDATE_UNRECOGNISED_ATTRIBUTE;
+		xvf->xvf_elem = xe;
+		xvf->xvf_attr = TAILQ_FIRST(&xe->attr_list);
+		xvf->xvf_vattr = attrs;
 		if (TAILQ_EMPTY(&xe->attr_list)) {
-			rv = 0;
+			xvf->xvf_reason = rv = XMLSD_VALIDATE_NO_ERROR;;
 		}
 		goto done;
 	}
@@ -445,8 +453,14 @@ xmlsd_check_attributes(struct xmlsd_element *xe, struct xmlsd_v_attr *attrs)
 			}
 		}
 
-		if (found == 0)
+		if (found == 0) {
+			xvf->xvf_reason = rv =
+			    XMLSD_VALIDATE_UNRECOGNISED_ATTRIBUTE;
+			xvf->xvf_elem = xe;
+			xvf->xvf_attr = xa;
+			xvf->xvf_vattr = attrs;
 			goto done;
+		}
 	}
 
 	/* Required attribute verification. */
@@ -462,29 +476,29 @@ xmlsd_check_attributes(struct xmlsd_element *xe, struct xmlsd_v_attr *attrs)
 			}
 		}
 
-		if (found == 0)
+		if (found == 0) {
+			xvf->xvf_reason = rv =
+			    XMLSD_VALIDATE_MISSING_REQUIRED_ATTRIBUTE;
+			xvf->xvf_elem = xe;
+			xvf->xvf_vattr = &attrs[i];
 			goto done;
+		}
 	}
 
-	rv = 0;
+	rv = XMLSD_VALIDATE_NO_ERROR;
 done:
 	return (rv);
 }
 
 static int
-xmlsd_occurrences(struct xmlsd_document *xl, struct xmlsd_element *parent,
-    const char *name)
+xmlsd_occurrences(struct xmlsd_element *parent, const char *name)
 {
 	struct xmlsd_element	*xi;
 	int			 occur;
 
-	/* Root node can only occur once by definition. */
-	if (parent == NULL) {
-		xi = xmlsd_doc_get_first_elem(xl);
-		if (xi == NULL || !strcmp(xi->name, name))
-			return 0;
-		return 1;
-	}
+	/* We don't handle root nodes, only children of it */
+	if (parent == NULL)
+		return (0);
 
 	occur = 0;
 	XMLSD_ELEM_FOREACH_CHILDREN(xi, parent) {
@@ -503,15 +517,16 @@ xmlsd_occurrences(struct xmlsd_document *xl, struct xmlsd_element *parent,
  */
 static int
 xmlsd_validate_element(struct xmlsd_document *xd, struct xmlsd_element *xe,
-    struct xmlsd_v_elem *cmd, struct xmlsd_v_elem *xc)
+    struct xmlsd_v_elem *cmd, struct xmlsd_v_elem *xc, struct
+    xmlsd_validate_failure *xvf)
 {
 	struct xmlsd_element	*xi;
 	char			*dot;
 	char			 xe_path[1024];
-	int			 i, rv = 1, occur;
+	int			 i, rv = 1, occur, reason;
 
 	/* check attributes */
-	if (xmlsd_check_attributes(xe, cmd->attr)) {
+	if ((rv = xmlsd_check_attributes(xe, cmd->attr, xvf)) != 0) {
 		goto done;
 	}
 
@@ -519,7 +534,9 @@ xmlsd_validate_element(struct xmlsd_document *xd, struct xmlsd_element *xe,
 	 * Element occurrence validation.
 	 */
 
-	if (xmlsd_calc_path(xe, xe_path, sizeof xe_path)) {
+	if ((reason = xmlsd_calc_path(xe, xe_path, sizeof xe_path)) != 0) {
+		xvf->xvf_reason = reason;
+		xvf->xvf_elem = xe;
 		goto done;
 	}
 	for (i = 0; xc[i].element != NULL; i++) {
@@ -531,18 +548,28 @@ xmlsd_validate_element(struct xmlsd_document *xd, struct xmlsd_element *xe,
 		dot = strchr(xc[i].path, '.');
 		if (dot == NULL)
 			continue;	/* xc[i] is no child. */
-		if (strcmp(xe_path, dot + 1))
+		if (strcmp(xe_path, dot + 1)) 
 			continue;	/* xc[i] is stranger child. */
 
 		/*
 		 * xc[i] is a child of xe and has occurrence
 		 * constraints.
 		 */
-		occur = xmlsd_occurrences(xd, xe, xc[i].element);
-		if (occur < xc[i].min_occurs)
+		occur = xmlsd_occurrences(xe, xc[i].element);
+		if (occur < xc[i].min_occurs) {
+			rv = xvf->xvf_reason =
+			   XMLSD_VALIDATE_TOO_FEW_OCCURRENCES;
+			xvf->xvf_elem = xe;
+			xvf->xvf_velem = &xc[i];
 			goto done;
-		if (xc[i].max_occurs != 0 && occur > xc[i].max_occurs)
+		}
+		if (xc[i].max_occurs != 0 && occur > xc[i].max_occurs) {
+			rv = xvf->xvf_reason =
+			   XMLSD_VALIDATE_TOO_MANY_OCCURRENCES;
+			xvf->xvf_elem = xe;
+			xvf->xvf_velem = &xc[i];
 			goto done;
+		}
 	}
 	XMLSD_ELEM_FOREACH_CHILDREN(xi, xe) {
 		for (cmd = NULL, i = 0; xc[i].element != NULL; i++)
@@ -550,13 +577,56 @@ xmlsd_validate_element(struct xmlsd_document *xd, struct xmlsd_element *xe,
 			    !xmlsd_check_path(xi, xc[i].path))
 				cmd = &xc[i];
 		if (cmd == NULL) {
+			rv = xvf->xvf_reason =
+			    XMLSD_VALIDATE_UNRECOGNISED_ELEMENT;
+			xvf->xvf_elem = xi;
+			xvf->xvf_velem = xc; /* all validate structs */
 			goto done;
 		}
-		rv = xmlsd_validate_element(xd, xi, cmd, xc);
-		if (rv != 0)
+		if ((rv = xmlsd_validate_element(xd, xi, cmd, xc, xvf)) != 0){
+			/* errorset by caller */
 			goto done;
+		}
 	}
-	rv = 0;
+	xvf->xvf_reason = rv = 0;
+done:
+	return (rv);
+}
+
+int
+xmlsd_validate_info(struct xmlsd_document *xd, struct xmlsd_v_elements *els,
+    struct xmlsd_validate_failure *xvf)
+{
+	struct xmlsd_element	*xe;
+	struct xmlsd_v_elem	*cmd = NULL;
+	int			 i, rv;
+
+	/* find command */
+	if ((xe = xmlsd_doc_get_first_elem(xd)) == NULL) {
+		rv = xvf->xvf_reason = XMLSD_VALIDATE_EMPTY_XML;
+		goto done;
+	}
+
+	/* must not have a parent */
+	if (xe->parent) {
+		rv = xvf->xvf_reason = XMLSD_VALIDATE_ROOT_HAS_PARENT;
+		xvf->xvf_elem = xe;
+		goto done;
+	}
+
+	for (i = 0; els[i].name != NULL; i++)
+		if (!strcmp(els[i].name, xe->name))
+			cmd = els[i].cmd;
+	if (cmd == NULL) {
+		rv = xvf->xvf_reason = XMLSD_VALIDATE_UNRECOGNISED_COMMAND;
+		xvf->xvf_elem = xe;
+		goto done;
+	}
+
+
+	/* this will recurse over the whole tree */
+	rv = xmlsd_validate_element(xd, xe, cmd, cmd, xvf);
+
 done:
 	return (rv);
 }
@@ -571,30 +641,79 @@ done:
 int
 xmlsd_validate(struct xmlsd_document *xd, struct xmlsd_v_elements *els)
 {
-	struct xmlsd_element	*xe;
-	struct xmlsd_v_elem	*cmd = NULL;
-	int			 i, rv = 1;
+	struct xmlsd_validate_failure xvf;
 
 
-	/* find command */
-	if ((xe = xmlsd_doc_get_first_elem(xd)) == NULL)
-		goto done;
-
-	/* must not have a parent */
-	if (xe->parent)
-		goto done;
-
-	for (i = 0; els[i].name != NULL; i++)
-		if (!strcmp(els[i].name, xe->name))
-			cmd = els[i].cmd;
-	if (cmd == NULL)
-		goto done;
+	return (xmlsd_validate_info(xd, els, &xvf));
+}
 
 
-	/* this will recuse over the whole tree */
-	rv = xmlsd_validate_element(xd, xe, cmd, cmd);
+/*
+ * Return a failure string that characterised the failure in xvf.
+ * NULL means a memory allocation failure occured.
+ */
+char *
+xmlsd_get_validate_failure_string(struct xmlsd_validate_failure *xvf)
+{
+	char	*ret;
+	switch (xvf->xvf_reason) {
+		case XMLSD_VALIDATE_NO_ERROR:
+			ret = strdup("no error");
+			break;
+		case XMLSD_VALIDATE_UNRECOGNISED_ELEMENT:
+			asprintf(&ret, "unrecognised element \"%s\" as child"
+			    " of \"%s\"", xmlsd_elem_get_name(xvf->xvf_elem),
+			    xmlsd_elem_get_name(
+			    xmlsd_elem_get_parent(xvf->xvf_elem)));
+			break;
+		case XMLSD_VALIDATE_UNRECOGNISED_ATTRIBUTE:
+			asprintf(&ret, "unrecognised attribute \"%s\" as child "
+			    "of  \"%s\"", xmlsd_attr_get_name(xvf->xvf_attr),
+			    xmlsd_elem_get_name(xvf->xvf_elem));
+			break;
+		case XMLSD_VALIDATE_TOO_MANY_OCCURRENCES:
+			asprintf(&ret, "too many occurrences of \"%s\" in "
+			    "\"%s\" need %d, found %d",
+			    xvf->xvf_velem->element,
+			    xmlsd_elem_get_name(xvf->xvf_elem),
+			    xvf->xvf_velem->max_occurs,
+			    xmlsd_occurrences(xvf->xvf_elem,
+			    xvf->xvf_velem->element));
+			break;
+		case XMLSD_VALIDATE_TOO_FEW_OCCURRENCES:
+			asprintf(&ret, "too few occurrences of \"%s\" in \"%s\""
+			    " need %d, found %d", xvf->xvf_velem->element,
+			    xmlsd_elem_get_name(xvf->xvf_elem),
+			    xvf->xvf_velem->min_occurs,
+			    xmlsd_occurrences(xvf->xvf_elem,
+			    xvf->xvf_velem->element));
+			break;
+		case XMLSD_VALIDATE_MISSING_REQUIRED_ATTRIBUTE:
+			asprintf(&ret, "element \"%s\" is missing required "
+			    "attribute \"%s\"",
+			    xmlsd_elem_get_name(xvf->xvf_elem),
+			    xvf->xvf_vattr->name);
+			break;
+		case XMLSD_VALIDATE_PATH_TOO_LONG:
+			asprintf(&ret, "path to element \"%s\" too long:",
+			    xmlsd_elem_get_name(xvf->xvf_elem));
+			break;
+		case XMLSD_VALIDATE_EMPTY_XML:
+			asprintf(&ret, "XML is empty");
+			break;
+		case XMLSD_VALIDATE_ROOT_HAS_PARENT:
+			asprintf(&ret, "root element \"%s\" has parent",
+			    xmlsd_elem_get_name(xvf->xvf_elem));
+			break;
+		case XMLSD_VALIDATE_UNRECOGNISED_COMMAND:
+			asprintf(&ret, "unrecognised command \"%s\"",
+			    xmlsd_elem_get_name(xvf->xvf_elem));
+			break;
+		default:
+			asprintf(&ret, "unrecognised error %d", xvf->xvf_reason);
+			break;
+	};
 
-done:
-	return (rv);
+	return (ret);
 }
 

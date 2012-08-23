@@ -70,6 +70,25 @@ struct xmlsd_v_elements {
 	struct xmlsd_v_elem	*cmd;
 };
 
+struct xmlsd_validate_failure {
+	struct xmlsd_element	*xvf_elem;
+	struct xmlsd_attribute	*xvf_attr;
+	struct xmlsd_v_elem	*xvf_velem;
+	struct xmlsd_v_attr	*xvf_vattr;
+	enum xmlsd_validate_reason {
+		XMLSD_VALIDATE_NO_ERROR = 0,
+		XMLSD_VALIDATE_UNRECOGNISED_ELEMENT,
+		XMLSD_VALIDATE_UNRECOGNISED_ATTRIBUTE,
+		XMLSD_VALIDATE_TOO_MANY_OCCURRENCES,
+		XMLSD_VALIDATE_TOO_FEW_OCCURRENCES,
+		XMLSD_VALIDATE_MISSING_REQUIRED_ATTRIBUTE,
+		XMLSD_VALIDATE_PATH_TOO_LONG,
+		XMLSD_VALIDATE_EMPTY_XML,
+		XMLSD_VALIDATE_ROOT_HAS_PARENT,
+		XMLSD_VALIDATE_UNRECOGNISED_COMMAND,
+	}			 xvf_reason;
+};
+
 /* regular structures */
 
 /* XML attribute */
@@ -171,5 +190,10 @@ void			 xmlsd_doc_remove_elem(struct xmlsd_document *,
 /* validation */
 int			 xmlsd_validate(struct xmlsd_document *,
 			    struct xmlsd_v_elements *);
+int			 xmlsd_validate_info(struct xmlsd_document *,
+			     struct xmlsd_v_elements *,
+			     struct xmlsd_validate_failure *);
+char			*xmlsd_get_validate_failure_string(
+			     struct xmlsd_validate_failure *xvf);
 
 #endif /* XMLSD_H */
