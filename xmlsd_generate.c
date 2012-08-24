@@ -149,7 +149,7 @@ for_real:
 
 	if (flags & XMLSD_GEN_ADD_HEADER) {
 		obuf += snprintf(obuf, buf ? bufsz - (obuf-buf) : 0,
-		    "<?xml version=\"1.0\"?>" NL NL);
+		    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" NL NL);
 	}
 	if (xd->root != NULL)
 		obuf += xmlsd_generate_elem(xd->root, obuf, buf ?
