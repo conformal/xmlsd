@@ -172,11 +172,16 @@ xmlsd_start(void *data, const char *el, const char **attr)
 		if (xa == NULL)
 			XMLSD_ABORT(ctx, XMLSD_ERR_RESOURCE);
 		xa->name = strdup(attr[i]);
-		if (xa->name == NULL)
+		if (xa->name == NULL) {
+			free(xa);
 			XMLSD_ABORT(ctx, XMLSD_ERR_RESOURCE);
+		}
 		xa->value = strdup(attr[i + 1]);
-		if (xa->value == NULL)
+		if (xa->value == NULL) {
+			free(xa->name);
+			free(xa);
 			XMLSD_ABORT(ctx, XMLSD_ERR_RESOURCE);
+		}
 		TAILQ_INSERT_TAIL(&xe->attr_list, xa, entry);
 	}
 

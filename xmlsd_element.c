@@ -374,6 +374,7 @@ fail:
 			free(xa->name);
 		if (xa->value)
 			free(xa->value);
+		free(xa);
 	}
 	return 1;
 }
