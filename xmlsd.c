@@ -661,24 +661,28 @@ char *
 xmlsd_get_validate_failure_string(struct xmlsd_validate_failure *xvf)
 {
 	char	*ret;
+	int	 len = 0;
+
 	switch (xvf->xvf_reason) {
 		case XMLSD_VALIDATE_NO_ERROR:
 			ret = strdup("no error");
 			break;
 		case XMLSD_VALIDATE_UNRECOGNISED_ELEMENT:
-			asprintf(&ret, "unrecognised element \"%s\" as child"
-			    " of \"%s\"", xmlsd_elem_get_name(xvf->xvf_elem),
+			len = asprintf(&ret, "unrecognised element \"%s\" as "
+			    "child of \"%s\"",
+			    xmlsd_elem_get_name(xvf->xvf_elem),
 			    xmlsd_elem_get_name(
 			    xmlsd_elem_get_parent(xvf->xvf_elem)));
 			break;
 		case XMLSD_VALIDATE_UNRECOGNISED_ATTRIBUTE:
-			asprintf(&ret, "unrecognised attribute \"%s\" as child "
-			    "of  \"%s\"", xmlsd_attr_get_name(xvf->xvf_attr),
+			len = asprintf(&ret, "unrecognised attribute \"%s\" as "
+			    "child of  \"%s\"",
+			    xmlsd_attr_get_name(xvf->xvf_attr),
 			    xmlsd_elem_get_name(xvf->xvf_elem));
 			break;
 		case XMLSD_VALIDATE_TOO_MANY_OCCURRENCES:
-			asprintf(&ret, "too many occurrences of \"%s\" in "
-			    "\"%s\" need %d, found %d",
+			len = asprintf(&ret, "too many occurrences of \"%s\" "
+			    "in \"%s\" need %d, found %d",
 			    xvf->xvf_velem->element,
 			    xmlsd_elem_get_name(xvf->xvf_elem),
 			    xvf->xvf_velem->max_occurs,
@@ -686,38 +690,43 @@ xmlsd_get_validate_failure_string(struct xmlsd_validate_failure *xvf)
 			    xvf->xvf_velem->element));
 			break;
 		case XMLSD_VALIDATE_TOO_FEW_OCCURRENCES:
-			asprintf(&ret, "too few occurrences of \"%s\" in \"%s\""
-			    " need %d, found %d", xvf->xvf_velem->element,
+			len = asprintf(&ret, "too few occurrences of \"%s\" in "
+			    "\"%s\" need %d, found %d",
+			    xvf->xvf_velem->element,
 			    xmlsd_elem_get_name(xvf->xvf_elem),
 			    xvf->xvf_velem->min_occurs,
 			    xmlsd_occurrences(xvf->xvf_elem,
 			    xvf->xvf_velem->element));
 			break;
 		case XMLSD_VALIDATE_MISSING_REQUIRED_ATTRIBUTE:
-			asprintf(&ret, "element \"%s\" is missing required "
-			    "attribute \"%s\"",
+			len = asprintf(&ret, "element \"%s\" is missing "
+			    "required attribute \"%s\"",
 			    xmlsd_elem_get_name(xvf->xvf_elem),
 			    xvf->xvf_vattr->name);
 			break;
 		case XMLSD_VALIDATE_PATH_TOO_LONG:
-			asprintf(&ret, "path to element \"%s\" too long:",
+			len = asprintf(&ret, "path to element \"%s\" too long:",
 			    xmlsd_elem_get_name(xvf->xvf_elem));
 			break;
 		case XMLSD_VALIDATE_EMPTY_XML:
-			asprintf(&ret, "XML is empty");
+			len = asprintf(&ret, "XML is empty");
 			break;
 		case XMLSD_VALIDATE_ROOT_HAS_PARENT:
-			asprintf(&ret, "root element \"%s\" has parent",
+			len = asprintf(&ret, "root element \"%s\" has parent",
 			    xmlsd_elem_get_name(xvf->xvf_elem));
 			break;
 		case XMLSD_VALIDATE_UNRECOGNISED_COMMAND:
-			asprintf(&ret, "unrecognised command \"%s\"",
+			len = asprintf(&ret, "unrecognised command \"%s\"",
 			    xmlsd_elem_get_name(xvf->xvf_elem));
 			break;
 		default:
-			asprintf(&ret, "unrecognised error %d", xvf->xvf_reason);
+			len = asprintf(&ret, "unrecognised error %d",
+			    xvf->xvf_reason);
 			break;
 	};
+
+	if (len == -1)
+		ret = NULL;
 
 	return (ret);
 }
