@@ -89,6 +89,23 @@ struct xmlsd_validate_failure {
 	}			 xvf_reason;
 };
 
+struct xmlsd_v_elements_validation {
+	struct xmlsd_v_elements *xvev_elements;
+	struct xmlsd_v_elem	*xvev_elem;
+	struct xmlsd_v_attr	*xvev_attr;
+	enum xmlsd_validate_v_elements_failure {
+		XMLSD_VALIDATE_ELEMENTS_NO_ERROR = 0,
+		XMLSD_VALIDATE_ELEMENTS_NO_CMD,
+		XMLSD_VALIDATE_ELEMENTS_ROOT_PATH,
+		XMLSD_VALIDATE_ELEMENTS_NO_PATH,
+		XMLSD_VALIDATE_ELEMENTS_INVALID_PATH,
+		XMLSD_VALIDATE_ELEMENTS_UNRECOGNISED_ATTR_FLAG,
+		XMLSD_VALIDATE_ELEMENTS_MIN_OCCURS_NEGATIVE,
+		XMLSD_VALIDATE_ELEMENTS_MAX_OCCURS_NEGATIVE,
+		XMLSD_VALIDATE_ELEMENTS_MAX_LESS_THAN_MIN,
+	}			 xvev_reason;
+};
+
 /* regular structures */
 
 /* XML attribute */
@@ -195,5 +212,12 @@ int			 xmlsd_validate_info(struct xmlsd_document *,
 			     struct xmlsd_validate_failure *);
 char			*xmlsd_get_validate_failure_string(
 			     struct xmlsd_validate_failure *xvf);
+
+enum xmlsd_validate_v_elements_failure
+			 xmlsd_validate_v_elements(struct xmlsd_v_elements *cmds,
+    struct xmlsd_v_elements_validation *xvev);
+char *
+xmlsd_get_validate_v_elements_failure_string(
+    struct xmlsd_v_elements_validation *xvev);
 
 #endif /* XMLSD_H */

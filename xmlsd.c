@@ -731,3 +731,141 @@ xmlsd_get_validate_failure_string(struct xmlsd_validate_failure *xvf)
 	return (ret);
 }
 
+enum xmlsd_validate_v_elements_failure
+xmlsd_validate_v_elements(struct xmlsd_v_elements *cmds,
+    struct xmlsd_v_elements_validation *xvev)
+{
+	struct xmlsd_v_elements	*cmd;
+	struct xmlsd_v_elem	*elem;
+	int			 i, j, k;
+
+	for (i = 0; cmds[i].name != NULL; i++) {
+		/* fill in xvev as we go for simplicity */
+		xvev->xvev_elements = cmd = &cmds[i];
+		if (cmd->cmd == NULL) {
+			xvev->xvev_reason = XMLSD_VALIDATE_ELEMENTS_NO_CMD;
+			return (xvev->xvev_reason);
+		}
+		for (j = 0; cmd->cmd[j].element != NULL; j++) {
+			xvev->xvev_elem = elem = &cmd->cmd[j];
+			/*
+			 * first path should be NULL for top element, rest
+			 * should all have paths.
+			 */
+			if (elem->path == NULL) {
+				xvev->xvev_reason =
+				    XMLSD_VALIDATE_ELEMENTS_NO_PATH;
+				return (xvev->xvev_reason);
+			} else if (j == 0 && elem->path[0] != '\0') {
+				xvev->xvev_reason =
+				    XMLSD_VALIDATE_ELEMENTS_ROOT_PATH;
+				return (xvev->xvev_reason);
+			} else if (j > 0 && elem->path[0] == '\0') {
+				xvev->xvev_reason =
+				    XMLSD_VALIDATE_ELEMENTS_INVALID_PATH;
+				return (xvev->xvev_reason);
+
+			}
+			/*
+			 * XXX validate full path -
+			 * All paths same number of dots as previous, one more,
+			 * or one less.
+			 */
+			if (elem->attr != NULL) {
+				for (k = 0; elem->attr[k].name != NULL; k++) {
+					xvev->xvev_attr = &elem->attr[k];
+					/* check no flags we don't know */
+					if ((elem->attr[k].flags &
+					    ~(XMLSD_V_ATTR_F_REQUIRED)) != 0) {
+						xvev->xvev_reason =
+						    XMLSD_VALIDATE_ELEMENTS_UNRECOGNISED_ATTR_FLAG;
+						return (xvev->xvev_reason);
+					}
+				}
+			}
+			if (elem->min_occurs < 0) {
+				xvev->xvev_reason =
+				    XMLSD_VALIDATE_ELEMENTS_MIN_OCCURS_NEGATIVE;
+				return (xvev->xvev_reason);
+			}
+			if (elem->max_occurs < 0) {
+				xvev->xvev_reason =
+				    XMLSD_VALIDATE_ELEMENTS_MAX_OCCURS_NEGATIVE;
+				return (xvev->xvev_reason);
+			}
+			if (elem->max_occurs != 0 &&
+			    elem->min_occurs != 0 &&
+			    elem->max_occurs < elem->min_occurs) {
+				xvev->xvev_reason =
+				    XMLSD_VALIDATE_ELEMENTS_MAX_LESS_THAN_MIN;
+				return (xvev->xvev_reason);
+			}
+
+		}
+	}
+		
+	return (XMLSD_VALIDATE_ELEMENTS_NO_ERROR);
+}
+
+char *
+xmlsd_get_validate_v_elements_failure_string(
+    struct xmlsd_v_elements_validation *xvev)
+{
+	char	*ret;
+	int	 len = 0;
+
+	switch (xvev->xvev_reason) {
+	case XMLSD_VALIDATE_NO_ERROR:
+		ret = strdup("no error");
+		break;
+	case XMLSD_VALIDATE_ELEMENTS_NO_CMD:
+		len = asprintf(&ret, "element %s has no command",
+		    xvev->xvev_elements->name);
+		break;
+	case XMLSD_VALIDATE_ELEMENTS_ROOT_PATH:
+		len = asprintf(&ret, "%s root element %s has a path %s",
+		    xvev->xvev_elements->name, xvev->xvev_elem->element,
+		    xvev->xvev_elem->path);
+		break;
+	case XMLSD_VALIDATE_ELEMENTS_NO_PATH:
+		len = asprintf(&ret, "%s element %s has NULL path",
+		    xvev->xvev_elements->name, xvev->xvev_elem->element);
+		break;
+	case XMLSD_VALIDATE_ELEMENTS_INVALID_PATH:
+		len = asprintf(&ret, "%s element %s has invalid path %s",
+		    xvev->xvev_elements->name, xvev->xvev_elem->element,
+		    xvev->xvev_elem->path);
+		break;
+	case XMLSD_VALIDATE_ELEMENTS_UNRECOGNISED_ATTR_FLAG:
+		len = asprintf(&ret, "%s element %s attribute %s "
+		    "unrecognised flag %d", xvev->xvev_elements->name,
+		    xvev->xvev_elem->element, xvev->xvev_attr->name,
+		    xvev->xvev_attr->flags);
+		break;
+	case XMLSD_VALIDATE_ELEMENTS_MIN_OCCURS_NEGATIVE:
+		len = asprintf(&ret, "%s element %s has negative min_occurs "
+		    "(%d)", xvev->xvev_elements->name,
+		    xvev->xvev_elem->element, xvev->xvev_elem->min_occurs);
+		break;
+	case XMLSD_VALIDATE_ELEMENTS_MAX_OCCURS_NEGATIVE:
+		len = asprintf(&ret, "%s element %s has negative max_occurs "
+		    "(%d)", xvev->xvev_elements->name,
+		    xvev->xvev_elem->element, xvev->xvev_elem->max_occurs);
+		break;
+	case XMLSD_VALIDATE_ELEMENTS_MAX_LESS_THAN_MIN:
+		len = asprintf(&ret, "%s element %s has max_occurs (%d) "
+		    "less than min_occurs (%d)", xvev->xvev_elements->name,
+		    xvev->xvev_elem->element, xvev->xvev_elem->max_occurs,
+		    xvev->xvev_elem->min_occurs);
+		break;
+	default:
+		len = asprintf(&ret, "unrecognised error %d",
+		    xvev->xvev_reason);
+		break;
+	}
+
+	if (len == -1)
+		ret = NULL;
+
+	return (ret);
+}

@@ -38,6 +38,14 @@
 
 .Ft int
 .Fn xmlsd_validate "struct xmlsd_document *xd" "struct xmlsd_v_elements *v_elem"
+.Ft int
+.Fn xmlsd_validate_info "struct xmlsd_document *xd" "struct xmlsd_v_elements *v_elem, "struct xmlsd_validate_failure *xvf"
+.Ft char
+.Fn xmlsd_get_validate_failure_string "struct xmlsd_validate_failure *xvf"
+.Ft enum xmlsd_validate_v_elements_failure
+.Fn xmlsd_validate_v_elements "struct xmlsd_v_elements *cmds", "struct xmlsd_v_elements_validation *xvev"
+.Ft char
+.Fn xmlsd_get_validate_v_elements_failure_string "struct xmlsd_validate_v-elements_validation *xvev"
 
 .Ft int
 .Fn xmlsd_parse_fileds "int fd" "struct xmlsd_document *xd"
