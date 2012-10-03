@@ -45,7 +45,7 @@
 .Ft enum xmlsd_validate_v_elements_failure
 .Fn xmlsd_validate_v_elements "struct xmlsd_v_elements *cmds", "struct xmlsd_v_elements_validation *xvev"
 .Ft char
-.Fn xmlsd_get_validate_v_elements_failure_string "struct xmlsd_validate_v-elements_validation *xvev"
+.Fn xmlsd_get_validate_v_elements_failure_string "struct xmlsd_validate_v_elements_validation *xvev"
 
 .Ft int
 .Fn xmlsd_parse_fileds "int fd" "struct xmlsd_document *xd"
@@ -143,6 +143,167 @@ default"
 
 .Ft void
 .Fn xmlsd_version "int *major" "int *minor" "int *patch"
+.Sh DESCRIPTION
+The
+.Nm
+library has three basic types:
+.Vt struct xmlsd_document ,
+.Vt struct xmlsd_element ,
+and
+.Vt struct xmlsd_attribute ,
+Representing the various parts of an xml document.
+
+The top-level type
+.Vt xmlsd_document
+is required before any other manipulation occurs on the document.
+.Fn xmlsd_doc_alloc
+allocates an
+.Vt xmlsd_document
+to
+.Fa xdp
+or returns an error.
+The document may then either be filled by parsing an existing xml
+document, or built from from scratch using xmlsd apis, both methods will
+be described below.
+A document may be cleared (but not freed) by
+.Fn xmlsd_doc_clear ,
+or cleared and freed by
+.Fn xmlsd_doc_free .
+.Fn xmlsd_doc_is_empty
+returns true or false if the document is empty or not.
+.Fn xmlsd_doc_get_root ,
+will return either the root element, or NULL if empty.
+.Pp
+.Vt struct xmlsd_element
+represents an individual element within an XML document.
+A new element is added to a document using
+.Fn xmlsd_doc_add_elem
+which will add an elemnt with name
+.Fa name
+to the document 
+.Fa xd
+with the parent
+.Fa parent ,
+The new element will be returned.
+If
+.Fa parent
+is NULL then the element will be added as the root element of the document.
+Conversely,
+.Fn xmlsd_doc_remove_elem
+will remove an element (and its children).
+To fully initialize the new element attributes may be set with
+.Fn xmlsd_elem_set_attr ,
+which will add an attribute with
+.Fa name
+and
+.Fa value
+to
+.Fa xe .
+alternative versions of the function exist to set attributes with given types.
+.Fn xmlsd_elem_set_value 
+and the family of typed variations perform the same way for filling in the
+value of the element.
+Functions are also  provided to access the properties of an element:
+.Fn xmlsd_elem_get_name ,
+.Fn xmlsd_elem_get_value ,
+.Fn xmlsd_elem_get_depth ,
+and
+.Fn xmlsd_elem-get_parent
+will return the named property from an element.
+additonally
+.Fn xmlsd_elem_get_value_strtonum ,
+and
+.Fn xmlsd_elem_get_value_hexnum  ,
+and
+.Fn xmlsd_elem_get_value_boolean
+may be used if additional processing of the value is needed.
+Similarly to the functions provided for the value, the values of the attributes
+for an element  may be accessed using
+.Fn xmlsd_elem_get_attr ,
+.Fn xmlsd_elem_get_attr_strtonum ,
+.Fn xmlsd_elem_get_attr_hexnum ,
+or
+.Fn xmlsd_elem_get_attr_boolean .
+.Pp
+A direct child of an element can be searched for using 
+.Fn xmlsd_elem_find_child ,
+alternatively
+.Fn xmlsd_elem_get_first_child ,
+.Fn xmlsd_elem_get_next_child ,
+.Fn xmlsd_elem_get_last_child and
+xmlsd_elem_get_previous may be used to iterate over the children.
+The macro
+.Fn XMLSD_ELEM_FOREACH_CHILDREN
+may be used as a convenient interface to the above.
+.Pp
+A
+.Vt struct xmlsd_attribute
+may be accessed using
+.Fn xmlsd_attr_get_name
+to access the name,
+and
+.Fn xmlsd_attr_get_value
+for the value.
+.Pp
+Two interfaces exist for parsing XML documents into
+.Nm
+structures.
+.Fn xmlsd_parse_file
+will parse the xml document in that is stored in
+.Fa file
+into
+.Fa xd,
+.Fn xmlsd_parse_mem
+will parse the xml document stored in
+.Fa buf .
+Both functions will return 0 on success or non zero on error.
+.Pp
+A string containing an XML document may be generated from
+.Vt struct xmlsd_document
+using
+.Fn xmlsd_generate.
+This function will generate the string from
+.Fa xd
+allocating the string using
+.Fa alloc_fn
+and return the size in
+.Fa szp.
+.Fa flags
+may be any of the following:
+.Bl -tag -width "XMLSD_GEN_ADD_HEADER" -compact
+.It Fa XMLSD_GEN_ADD_HEADER
+add a header with the encoding and xml version to the xml defined in the
+document. Without this flag only the elements explicitly in the
+.Xv xmlsd_document
+will be included.
+.El
+.Pp
+.Nm
+provides facilities to validate an XML document against an expected structure.
+.Fn xmlsd_validate
+will validate
+.Fa xd
+against the structures in 
+.Fa v_elem
+returnng 0 on success or non-zero on failure.
+.Fn xmlsd_validate_info
+may be used if more information is required about the validation failure,
+this function will populate
+.Fa xvf
+with information about the failure.
+.Fn xmlsd_get_validate_failure_string
+may be used to get an informational string from
+.Fa xvf.
+.Fn xmlsd_validate_v_elements
+may be used to verify that the validation strucures themsevles are valid for
+debugging purposes, with 
+.Fn xmlsd_get_validate_v_elements_failure_string
+providing a textual explanation of failures.
+.Sh EXAMPLES
+The regression directory in the
+.Nm
+source distribution contains a few authorative examples of library
+usage.
 .Sh HISTORY
 .An -nosplit
 .Nm
