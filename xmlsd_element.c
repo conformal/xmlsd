@@ -152,7 +152,7 @@ xmlsd_elem_get_attr_hexnum(struct xmlsd_element *xe, const char *attr,
 {
 	const char		*str;
 	char			*end;
-	unsigned long long	 val;
+	unsigned long long	 val = 0;
 
 	*errstr = NULL;
 	if ((str = xmlsd_elem_get_attr(xe, attr)) == NULL) {
@@ -408,7 +408,7 @@ xmlsd_elem_get_value_hexnum(struct xmlsd_element *xe,
 {
 	const char		*str;
 	char			*end;
-	unsigned long long	 val;
+	unsigned long long	 val = 0;
 
 	*errstr = NULL;
 	if ((str = xmlsd_elem_get_value(xe)) == NULL) {
