@@ -1,0 +1,12 @@
+ARFLAGS = crs
+
+LIB.SONAME = lib$(LIB.NAME).so.$(SO_MAJOR)
+LIB.SHARED = cyg$(LIB.NAME)-$(SO_MAJOR).dll
+LIB.DEVLNK = lib$(LIB.NAME).dll.a
+LIB.STATIC = lib$(LIB.NAME).a
+
+CPPFLAGS += -D_GNU_SOURCE
+WARNFLAGS += -Wno-error
+LDFLAGS.SO = -shared -Wl,--exclude-libs,ALL,--out-implib,$(OBJPREFIX)$(LIB.DEVLNK)
+LDFLAGS.EXTRA += -L$(LOCALBASE)/lib -lexpat -lclens
+SHARED_OBJ_EXT = o
