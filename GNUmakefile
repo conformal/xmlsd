@@ -45,12 +45,12 @@ INCFLAGS += -I$(INCDIR)/clens
 WARNFLAGS ?= -Wall -Werror
 DEBUG += -g
 CFLAGS += $(INCFLAGS) $(WARNFLAGS) $(DEBUG) -O2
-LDADD += -lexpat -lbsd
+LDFLAGS +=
 SHARED_OBJ_EXT ?= o
 
 LIB.NAME = xmlsd
 LIB.SRCS = xmlsd.c xmlsd_document.c xmlsd_element.c xmlsd_attribute.c
-LIB.SRCS += xmlsd_generate.c
+LIB.SRCS += xmlsd_generate.c 
 LIB.HEADERS = xmlsd.h
 LIB.MANPAGES = xmlsd.3
 LIB.MLINKS  =xmlsd.3 xmlsd_add_element.3
@@ -108,9 +108,9 @@ $(OBJPREFIX)%.o: %.c
 	@echo "Generating $@.depend"
 	@$(CC) $(INCFLAGS) -MM $(CPPFLAGS) $< | \
 	sed 's,$*\.o[ :]*,$@ $@.depend : ,g' >> $@.depend
-	$(CC) $(CFLAGS) $(CPPFLAGS) -o $@ -c $<
+	$(CC) $(CFLAGS) $(CPPFLAGS) -o $@ -c $< 
 
-depend:
+depend: 
 	@echo "Dependencies are automatically generated.  This target is not necessary."
 
 install:
