@@ -553,7 +553,7 @@ xmlsd_validate_element(struct xmlsd_document *xd, struct xmlsd_element *xe,
 		dot = strchr(xc[i].path, '.');
 		if (dot == NULL)
 			continue;	/* xc[i] is no child. */
-		if (strcmp(xe_path, dot + 1)) 
+		if (strcmp(xe_path, dot + 1))
 			continue;	/* xc[i] is stranger child. */
 
 		/*
@@ -638,7 +638,7 @@ done:
 
 /*
  * Validate XML
- * 
+ *
  * The structures used for validation assume a structure with one  top-level
  * command containing all other tags. Furthermore recursive structures
  * can not be defined and validated at this time.
@@ -803,7 +803,7 @@ xmlsd_validate_v_elements(struct xmlsd_v_elements *cmds,
 
 		}
 	}
-		
+
 	return (XMLSD_VALIDATE_ELEMENTS_NO_ERROR);
 }
 
