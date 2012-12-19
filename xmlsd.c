@@ -27,9 +27,9 @@
 #include <expat.h>
 
 #ifdef BUILDSTR
-static const char *vertag = "version: " XMLSD_VERSION " " BUILDSTR;
+static const char *vertag = XMLSD_VERSION " " BUILDSTR;
 #else
-static const char *vertag = "version: " XMLSD_VERSION;
+static const char *vertag = XMLSD_VERSION;
 #endif
 
 
