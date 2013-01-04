@@ -1,6 +1,6 @@
 
 %define name		xmlsd
-%define version		0.9.0
+%define version		0.10.0
 %define release		1
 
 Name: 		%{name}
@@ -57,6 +57,13 @@ develop applications with xmlsd.
 /usr/lib/libxmlsd.a
 
 %changelog
+* Fri Jan 04 2013 - davec 0.10.0-1
+- Make generated XML include UTF-8 encoding param
+- Add new functions to get details on validation info --
+  xmlsd_validate_info() and xmlsd_get_validate_failure_string()
+- Fix a couple of memory leaks in error paths
+- Remove the 'version: ' prefix from xmlsd_verstring
+- Other minor code cleanup
 * Wed Aug 15 2012 - davec 0.9.0-1
 - Properly escape reserved characters in xml attributes and values
 - Change xmlsd API to model xml tree instead of a list emulating a tree

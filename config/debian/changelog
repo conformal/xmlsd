@@ -1,3 +1,14 @@
+xmlsd (0.10.0-1) unstable; urgency=low
+
+  * Make generated XML include UTF-8 encoding param
+  * Add new functions to get details on validation info --
+    xmlsd_validate_info() and xmlsd_get_validate_failure_string()
+  * Fix a couple of memory leaks in error paths
+  * Remove the 'version: ' prefix from xmlsd_verstring
+  * Other minor code cleanup
+
+ -- Conformal Systems <package-discuss@conformal.com>  Fri, 04 Jan 2013 17:20:22 -0600
+
 xmlsd (0.9.0-1) unstable; urgency=low
 
   * Properly escape reserved characters in xml attributes and values
