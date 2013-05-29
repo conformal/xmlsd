@@ -3,6 +3,7 @@
 COMMENT=	XML validation library
 
 DISTNAME=	xmlsd-0.10.0
+EPOCH=		0
 PKGNAME=	lib${DISTNAME}
 CATEGORIES=    	textproc devel
 SHARED_LIBS=	xmlsd	3.2
@@ -14,13 +15,10 @@ MAINTAINER=	Conformal Systems LLC <info@conformal.com>
 
 WANTLIB= 	expat
 
-NO_REGRESS=	Yes
+NO_TEST=	Yes
 
 # ISC
 PERMIT_PACKAGE_CDROM=	Yes
-PERMIT_PACKAGE_FTP=	Yes
-PERMIT_DISTFILES_CDROM=	Yes
-PERMIT_DISTFILES_FTP=	Yes
 
 do-configure:
 	printf "major=${LIBxmlsd_VERSION:R}\nminor=${LIBxmlsd_VERSION:E}\n" \
