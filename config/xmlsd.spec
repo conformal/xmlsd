@@ -1,6 +1,6 @@
 
 %define name		xmlsd
-%define version		0.10.0
+%define version		0.10.1
 %define release		1
 
 Name: 		%{name}
@@ -57,6 +57,8 @@ develop applications with xmlsd.
 /usr/lib/libxmlsd.a
 
 %changelog
+* Fri May 31 2013 - davec 0.10.1-1
+- Fix OpenBSD port Makefile for modern OpenBSD ports
 * Fri Jan 04 2013 - davec 0.10.0-1
 - Make generated XML include UTF-8 encoding param
 - Add new functions to get details on validation info --
